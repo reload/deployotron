@@ -206,28 +206,3 @@ function deployotron_exec($site, $command) {
   }
   return TRUE;
 }
-
-/*
-
-pre-deploy
-on-deploy
-post-deploy
-
-
-
-
-
-site offline
-db dump
-gittyup
-updb
-cc all
-site online
-
-clear varnish
-
-
-
-
-
- */
