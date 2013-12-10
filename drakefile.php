@@ -50,7 +50,7 @@ $tasks['deployotron-install'] = array(
     array(
       'command' => 'dl',
       'args' => array(
-        0 => 'drush_drake-7.x-1.6',
+        0 => 'drush_drake-7.x-1.7',
         'destination' => 'sites/all/drush',
       ),
     ),
