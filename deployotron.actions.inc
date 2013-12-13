@@ -17,7 +17,30 @@
  */
 function deployotron_deploy_action_sanity_check($settings) {
   $status = `git status -s`;
-  return empty($status);
+  if ($status) {
+    return drush_set_error(dt('Repository not clean.'));
+  }
+}
+
+/**
+ * Deploy code.
+ *
+ * @param array $settings
+ *   Settings.
+ *
+ * @return boolean
+ *   Success or failure.
+ */
+function deployotron_deploy_action_deploy_code($settings) {
+  if (!exec('git fetch')) {
+    return drush_set_error(dt("Could not fetch from remote repository."));
+  }
+
+  if (!exec('git checkout deploy-test')) {
+    return drush_set_error(dt('Could not checkout code.'));
+  }
+
+  return TRUE;
 }
 
 /**

@@ -65,7 +65,7 @@ function drush_deployotron_deploy() {
     'sanity-check',
     'site-offline',
     'backup-database',
-    #'deploy-code',
+    'deploy-code',
     'update-database',
     'clear-cache',
     'restart-apache2',
