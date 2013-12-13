@@ -16,7 +16,8 @@
  *   Success or failure.
  */
 function deployotron_deploy_action_sanity_check($settings) {
-  return TRUE;
+  $status = `git status -s`;
+  return empty($status);
 }
 
 /**
