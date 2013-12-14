@@ -73,7 +73,7 @@ function drush_deployotron_deploy() {
     'restart-varnish',
   ), $settings);
 
-  if (!deployotron_confirm_actions($actions)) {
+  if (!deployotron_confirm_actions($actions, $settings)) {
     return;
   }
 

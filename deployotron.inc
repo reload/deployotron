@@ -135,11 +135,12 @@ function deployotron_determine_actions($actions, $settings) {
  * @return boolean
  *   Go or no-go.
  */
-function deployotron_confirm_actions($actions) {
+function deployotron_confirm_actions($actions, $settings) {
   $msg = "Deployotron wants to:\n\n";
   foreach ($actions as $action) {
     $msg .= $action['description'] . "\n";
   }
+  $msg .= "\nusing settings:" . print_r($settings, TRUE) . "\n";
   $msg .= "\nIs this OK?";
   return drush_confirm($msg);
 }
