@@ -15,11 +15,13 @@
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_sanity_check($settings) {
-  $status = `git status -s`;
-  if ($status) {
+function deployotron_deploy_action_sanity_check($site, $settings) {
+  $status = deployotron_exec($site, 'git status -s');
+  if (!$status) {
     return drush_set_error(dt('Repository not clean.'));
   }
+
+  return TRUE;
 }
 
 /**
@@ -31,12 +33,12 @@ function deployotron_deploy_action_sanity_check($settings) {
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_deploy_code($settings) {
-  if (!exec('git fetch')) {
+function deployotron_deploy_action_deploy_code($site, $settings) {
+  if (!deployotron_exec($site, 'git fetch')) {
     return drush_set_error(dt("Could not fetch from remote repository."));
   }
 
-  if (!exec('git checkout deploy-test')) {
+  if (!deployotron_exec($site, 'git checkout origin/' . $settings['branch'])) {
     return drush_set_error(dt('Could not checkout code.'));
   }
 
@@ -52,8 +54,8 @@ function deployotron_deploy_action_deploy_code($settings) {
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_site_offline($settings) {
-  if (!deployotron_invoke_process('@self', 'variable-set', array('maintainance_mode', 1))) {
+function deployotron_deploy_action_site_offline($site, $settings) {
+  if (!deployotron_invoke_process($site, 'variable-set', array('maintainance_mode', 1))) {
     return drush_set_error(dt('Error setting site offline.'));
   }
   return TRUE;
@@ -68,8 +70,8 @@ function deployotron_deploy_action_site_offline($settings) {
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_site_online($settings) {
-  if (!deployotron_invoke_process('@self', 'variable-set', array('maintainance_mode', 0))) {
+function deployotron_deploy_action_site_online($site, $settings) {
+  if (!deployotron_invoke_process($site, 'variable-set', array('maintainance_mode', 0))) {
     return drush_set_error(dt('Error setting site online.'));
   }
   return TRUE;
@@ -84,11 +86,11 @@ function deployotron_deploy_action_site_online($settings) {
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_backup_database($settings) {
+function deployotron_deploy_action_backup_database($site, $settings) {
   $date = date('Y-m-d\TH:i:s');
-  $sha = deployotron_determine_sha($settings);
+  $sha = deployotron_determine_sha($site, $settings);
   $dump_name = $settings['dump-dir'] . "/deploy.$date.$sha.sql";
-  if (!deployotron_invoke_process('@self', 'sql-dump', array(), array('no-ordered-dump' => TRUE, 'result-file' => $dump_name))) {
+  if (!deployotron_invoke_process($site, 'sql-dump', array(), array('no-ordered-dump' => TRUE, 'result-file' => $dump_name))) {
     return drush_set_error('Error dumping database.');
   }
   return TRUE;
@@ -103,8 +105,8 @@ function deployotron_deploy_action_backup_database($settings) {
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_restart_apache2($settings) {
-  if (!deployotron_exec('@self', 'sudo service apache2 restart')) {
+function deployotron_deploy_action_restart_apache2($site, $settings) {
+  if (!deployotron_exec($site, 'sudo service apache2 restart')) {
     return drush_set_error(dt('Error restarting apache2.'), 'error');
   }
   return TRUE;
@@ -119,8 +121,8 @@ function deployotron_deploy_action_restart_apache2($settings) {
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_restart_varnish($settings) {
-  if (!deployotron_exec('@self', 'sudo service varnish restart')) {
+function deployotron_deploy_action_restart_varnish($site, $settings) {
+  if (!deployotron_exec($site, 'sudo service varnish restart')) {
     return drush_set_error(dt('Error restarting varnish.'), 'error');
   }
   return TRUE;
@@ -135,8 +137,8 @@ function deployotron_deploy_action_restart_varnish($settings) {
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_update_database($settings) {
-  if (!deployotron_invoke_process('@self', 'updb', array(), array('yes' => TRUE))) {
+function deployotron_deploy_action_update_database($site, $settings) {
+  if (!deployotron_invoke_process($site, 'updb', array(), array('yes' => TRUE))) {
     return drush_set_error(dt('Error running database updates.'));
   }
   return TRUE;
@@ -151,8 +153,8 @@ function deployotron_deploy_action_update_database($settings) {
  * @return boolean
  *   Success or failure.
  */
-function deployotron_deploy_action_clear_cache($settings) {
-  if (!deployotron_invoke_process('@self', 'cc', array('all'), array())) {
+function deployotron_deploy_action_clear_cache($site, $settings) {
+  if (!deployotron_invoke_process($site, 'cc', array('all'), array())) {
     return drush_set_error(dt('Error clearing cache.'));
   }
   return TRUE;

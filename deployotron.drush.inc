@@ -13,7 +13,11 @@ require_once 'deployotron.actions.inc';
 function deployotron_drush_command() {
   $items['deploy'] = array(
     'description' => 'Deploy site to environment.',
+    'arguments' => array(
+      'site-alias' => 'Site alias to deploy to.'
+    ),
     'options' => array(
+      'branch' => 'Branch to check out.',
       'restart-apache2' => 'Restart Apache2.',
       'restart-varnish' => 'Restart Varnish.',
       'no-dump' => 'Do not create a database dump.',
@@ -44,16 +48,34 @@ function deployotron_drush_help($section) {
   }
 }
 
+/**
+ * Verify arguments to the deploy command.
+ */
+function drush_deployotron_deploy_validate($site = NULL) {
+  // We'd prefer to use something like drush_set_context, but it claims it's for
+  // private use, so we'll have to fall back to good old global vars.
+  global $_deployotron_site;
+
+  if (empty($site)) {
+    return drush_set_error('NO_ALIAS', dt('No alias given.'));
+
+  }
+  $_deployotron_site = drush_sitealias_get_record($site);
+  if (empty($_deployotron_site)) {
+    return drush_set_error('BAD_ALIAS', dt('Invalid alias.'));
+  }
+}
 
 /**
  * Action callback.
  *
  * Runs the deployment.
  */
-function drush_deployotron_deploy() {
-  global $_deployotron_settings;
+function drush_deployotron_deploy($site) {
+  global $_deployotron_settings, $_deployotron_site;
   // Determine settings.
   $settings = array(
+    'branch' => drush_get_option('branch', NULL),
     'restart-apache2' => drush_get_option('restart-apache2', FALSE),
     'restart-varnish' => drush_get_option('restart-varnish', FALSE),
     'no-dump' => drush_get_option('no-dump', FALSE),

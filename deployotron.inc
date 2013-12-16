@@ -20,7 +20,6 @@ function deployotron_invoke_process($site, $command, $args = array(), $options =
  */
 function deployotron_exec($site, $command) {
   $exec = drush_shell_proc_build($site, $command, TRUE);
-  var_dump($exec);
   // Return code 0 = success.
   if (drush_shell_proc_open($exec)) {
     return FALSE;
@@ -169,14 +168,15 @@ function deployotron_confirm_actions($actions, $settings) {
  *   Success or failure.
  */
 function deployotron_execute_actions($actions, $settings) {
-  global $_deployotron_rollbacks;
+  global $_deployotron_rollbacks, $_deployotron_site;
   $_deployotron_rollbacks = array();
   foreach ($actions as $action) {
     if (function_exists($action['callback'])) {
       $_deployotron_rollbacks[] = $action;
-      if (!$action['callback']($settings)) {
+      if (!$action['callback']($_deployotron_site, $settings)) {
         return FALSE;
       }
+      drush_log($action['description'], 'ok');
     }
     else {
       return FALSE;
@@ -197,9 +197,10 @@ function deployotron_execute_actions($actions, $settings) {
  *   Success or failure.
  */
 function deployotron_execute_rollbacks($rollbacks, $settings) {
+  global $_deployotron_site;
   foreach (array_reverse($rollbacks) as $action) {
     if (isset($action['rollback']) && function_exists($action['rollback'])) {
-      $action['rollback']($settings);
+      $action['rollback']($_deployotron_site, $settings);
     }
   }
   return TRUE;
@@ -211,6 +212,11 @@ function deployotron_execute_rollbacks($rollbacks, $settings) {
  * @return string
  *   SHA of this code base.
  */
-function deployotron_determine_sha() {
-  return trim(`git rev-parse HEAD`);
+function deployotron_determine_sha($site, $settings) {
+  $exec = drush_shell_proc_build($site, "git rev-parse HEAD", TRUE);
+  // Return code 0 = success.
+  if (drush_shell_exec($exec)) {
+    return trim(drush_shell_exec_output());
+  }
+  return '';
 }
