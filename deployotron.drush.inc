@@ -74,11 +74,11 @@ function drush_deployotron_deploy() {
   ), $settings);
 
   if (!deployotron_confirm_actions($actions, $settings)) {
-    return;
+    return drush_user_abort();
   }
 
   if (!deployotron_execute_actions($actions, $settings)) {
-    return;
+    return FALSE;
   }
 
   drush_print("Done.");
