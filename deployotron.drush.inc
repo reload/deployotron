@@ -81,5 +81,5 @@ function drush_deployotron_deploy() {
     return;
   }
 
-  drush_print("DONE!");
+  drush_print("Done.");
 }
