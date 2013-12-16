@@ -21,7 +21,7 @@ function deployotron_drush_command() {
       'no-updb' => 'Do not run update-db.',
       'no-cc-all' => 'Do not clear cache.',
     ),
-    // 'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
   );
 
   return $items;
