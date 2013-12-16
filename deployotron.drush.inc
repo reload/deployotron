@@ -11,8 +11,8 @@ require_once 'deployotron.actions.inc';
  * Implements hook_drush_command().
  */
 function deployotron_drush_command() {
-  $items['deployotron-deploy'] = array(
-    'description' => 'Deploy.',
+  $items['deploy'] = array(
+    'description' => 'Deploy site to environment.',
     'options' => array(
       'restart-apache2' => 'Restart Apache2.',
       'restart-varnish' => 'Restart Varnish.',
@@ -32,14 +32,14 @@ function deployotron_drush_command() {
  */
 function deployotron_drush_help($section) {
   switch ($section) {
-    case 'meta:drake:title':
-      return dt('Drake');
+    case 'meta:deployotron:title':
+      return dt('Deployotron');
 
-    case 'meta:drake:summary':
-      return dt('Do stuff.');
+    case 'meta:deployotron:summary':
+      return dt('Deploys site.');
 
-    case 'drush:drake':
-      return dt("Does stuff...");
+    case 'drush:deploy':
+      return dt("Deploy site to a specific environment.");
 
   }
 }
