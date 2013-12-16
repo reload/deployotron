@@ -42,44 +42,56 @@ function deployotron_available_actions($filter = NULL) {
   $actions = array();
   $actions['site-offline'] = array(
     'description' => dt('Set site offline.'),
-    'callback'    => 'deployotron_deploy_action_site_offline',
+    // 'callback'    => 'deployotron_deploy_action_site_offline',
+    // Use site-online as rollback.
+    'rollback' => 'deployotron_deploy_action_site_online',
   );
   $actions['site-online'] = array(
     'description' => dt('Set site online.'),
-    'callback'    => 'deployotron_deploy_action_site_online',
+    // 'callback'    => 'deployotron_deploy_action_site_online',
   );
   $actions['update-database'] = array(
     'description' => dt('Update database schema.'),
-    'callback'    => 'deployotron_deploy_action_update_database',
+    // 'callback'    => 'deployotron_deploy_action_update_database',
   );
   $actions['clear-cache'] = array(
     'description' => dt('Clear cache.'),
-    'callback'    => 'deployotron_deploy_action_clear_cache',
+    // 'callback'    => 'deployotron_deploy_action_clear_cache',
   );
   $actions['backup-database'] = array(
     'description' => dt('Dump database.'),
-    'callback'    => 'deployotron_deploy_action_backup_database',
+    // 'callback'    => 'deployotron_deploy_action_backup_database',
   );
   $actions['restore-database'] = array(
     'description' => dt('Restore database.'),
-    'callback'    => 'deployotron_deploy_action_restore_database',
+    // 'callback'    => 'deployotron_deploy_action_restore_database',
   );
   $actions['deploy-code'] = array(
     'description' => dt('Deploy code.'),
-    'callback'    => 'deployotron_deploy_action_deploy_code',
+    // 'callback'    => 'deployotron_deploy_action_deploy_code',
   );
   $actions['restart-apache2'] = array(
     'description' => dt('Restart Apache2'),
-    'callback'    => 'deployotron_deploy_action_restart_apache2',
+    // 'callback'    => 'deployotron_deploy_action_restart_apache2',
   );
   $actions['restart-varnish'] = array(
     'description' => dt('Restart Varnish'),
-    'callback'    => 'deployotron_deploy_action_restart_varnish',
+    // 'callback'    => 'deployotron_deploy_action_restart_varnish',
   );
   $actions['sanity-check'] = array(
     'description' => dt('Sanity check'),
-    'callback'    => 'deployotron_deploy_action_sanity_check',
+    // 'callback'    => 'deployotron_deploy_action_sanity_check',
   );
+
+  foreach ($actions as $name => $action) {
+    if (empty($action['callback'])) {
+      $actions[$name]['callback'] = 'deployotron_deploy_action_' . strtr($name, array('-' => '_'));
+    }
+    if (empty($action['summary callback'])) {
+      $actions[$name]['summary callback'] = 'deployotron_deploy_action_' . strtr($name, array('-' => '_')) . '_summary';
+    }
+  }
+
   if (is_array($filter)) {
     $filtered_actions = array();
     foreach ($filter as $action) {
@@ -157,9 +169,37 @@ function deployotron_confirm_actions($actions, $settings) {
  *   Success or failure.
  */
 function deployotron_execute_actions($actions, $settings) {
+  global $_deployotron_rollbacks;
+  $_deployotron_rollbacks = array();
   foreach ($actions as $action) {
-    if (!$action['callback']($settings)) {
+    if (function_exists($action['callback'])) {
+      $_deployotron_rollbacks[] = $action;
+      if (!$action['callback']($settings)) {
+        return FALSE;
+      }
+    }
+    else {
       return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+/**
+ * Execute rollbacks.
+ *
+ * @param array $actions
+ *   Actions to execute.
+ * @param array $settings
+ *   Settings for the actions.
+ *
+ * @return boolean
+ *   Success or failure.
+ */
+function deployotron_execute_rollbacks($rollbacks, $settings) {
+  foreach (array_reverse($rollbacks) as $action) {
+    if (isset($action['rollback']) && function_exists($action['rollback'])) {
+      $action['rollback']($settings);
     }
   }
   return TRUE;

@@ -51,6 +51,7 @@ function deployotron_drush_help($section) {
  * Runs the deployment.
  */
 function drush_deployotron_deploy() {
+  global $_deployotron_settings;
   // Determine settings.
   $settings = array(
     'restart-apache2' => drush_get_option('restart-apache2', FALSE),
@@ -73,6 +74,8 @@ function drush_deployotron_deploy() {
     'restart-varnish',
   ), $settings);
 
+  $_deployotron_settings = $settings;
+
   if (!deployotron_confirm_actions($actions, $settings)) {
     return drush_user_abort();
   }
@@ -82,4 +85,14 @@ function drush_deployotron_deploy() {
   }
 
   drush_print("Done.");
+}
+
+/**
+ * Rollback deploy command.
+ */
+function drush_deployotron_deploy_rollback() {
+  global $_deployotron_settings, $_deployotron_rollbacks;
+  if (count($_deployotron_rollbacks)) {
+    deployotron_execute_rollbacks($_deployotron_rollbacks, $settings);
+  }
 }
