@@ -2,10 +2,20 @@
 /**
  * @file
  * Drush commands for Deployotron!
+ *
+ * In order to be able to restart apache2/varnish, use the following command to
+ * edit a sudoers.d config file:
+ *
+ * sudo visudo -f /etc/sudoers.d/deployotron
+ *
+ * And add the following to the file:
+ *
+ * deploy_user          ALL=(root) NOPASSWD: /usr/sbin/service apache2 restart,/usr/sbin/service varnish restart
  */
 
-require_once 'deployotron.inc';
 require_once 'deployotron.actions.inc';
+
+use Deployotron\ActionFactory;
 
 /**
  * Implements hook_drush_command().
@@ -14,19 +24,18 @@ function deployotron_drush_command() {
   $items['deploy'] = array(
     'description' => 'Deploy site to environment.',
     'arguments' => array(
-      'site-alias' => 'Site alias to deploy to.'
+      'site-alias' => 'Site alias to deploy to.',
     ),
     'options' => array(
-      'branch' => 'Branch to check out.',
-      'restart-apache2' => 'Restart Apache2.',
-      'restart-varnish' => 'Restart Varnish.',
-      'no-dump' => 'Do not create a database dump.',
-      'dump-dir' => 'Directory to dump database into.',
-      'no-updb' => 'Do not run update-db.',
-      'no-cc-all' => 'Do not clear cache.',
+      'no-confirm' => 'Do not require confirmation before running.',
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
   );
+  foreach (ActionFactory::getActions('deploy') as $action) {
+    if ($options = $action->getOptions()) {
+      $items['deploy']['options'] += $options;
+    }
+  }
 
   return $items;
 }
@@ -51,18 +60,37 @@ function deployotron_drush_help($section) {
 /**
  * Verify arguments to the deploy command.
  */
-function drush_deployotron_deploy_validate($site = NULL) {
+function drush_deployotron_deploy_validate($site_alias = NULL) {
   // We'd prefer to use something like drush_set_context, but it claims it's for
   // private use, so we'll have to fall back to good old global vars.
-  global $_deployotron_site;
+  global $_deployotron_actions;
 
-  if (empty($site)) {
+  if (empty($site_alias)) {
     return drush_set_error('NO_ALIAS', dt('No alias given.'));
 
   }
-  $_deployotron_site = drush_sitealias_get_record($site);
-  if (empty($_deployotron_site)) {
+  $site = drush_sitealias_get_record($site_alias);
+  if (empty($site)) {
     return drush_set_error('BAD_ALIAS', dt('Invalid alias.'));
+  }
+
+  // Copy options from the deployotron key in as command line options.
+  if (!empty($site['deployotron'])) {
+    foreach ($site['deployotron'] as $option => $value) {
+      drush_set_option($option, $value);
+    }
+  }
+
+  $_deployotron_actions = ActionFactory::getActions('deploy', $site);
+  foreach ($_deployotron_actions as $action) {
+    if ($action->enabled()) {
+      if (!$action->validate()) {
+        if (!drush_get_error()) {
+          drush_set_error(dt('@action validation failed without a message.', array('@action' => $action->getShort())));
+        }
+        return FALSE;
+      }
+    }
   }
 }
 
@@ -72,38 +100,44 @@ function drush_deployotron_deploy_validate($site = NULL) {
  * Runs the deployment.
  */
 function drush_deployotron_deploy($site) {
-  global $_deployotron_settings, $_deployotron_site;
-  // Determine settings.
-  $settings = array(
-    'branch' => drush_get_option('branch', NULL),
-    'restart-apache2' => drush_get_option('restart-apache2', FALSE),
-    'restart-varnish' => drush_get_option('restart-varnish', FALSE),
-    'no-dump' => drush_get_option('no-dump', FALSE),
-    'dump-dir' => drush_get_option('dump-dir', '/tmp'),
-    'no-updb' => drush_get_option('no-updb', FALSE),
-    'no-cc-all' => drush_get_option('no-cc-all', FALSE),
-  );
+  global $_deployotron_actions, $_deployotron_rollbacks;
+  $_deployotron_rollbacks = array();
 
-  $actions = deployotron_determine_actions(array(
-    'sanity-check',
-    'site-offline',
-    'backup-database',
-    'deploy-code',
-    'update-database',
-    'clear-cache',
-    'restart-apache2',
-    'site-online',
-    'restart-varnish',
-  ), $settings);
-
-  $_deployotron_settings = $settings;
-
-  if (!deployotron_confirm_actions($actions, $settings)) {
-    return drush_user_abort();
+  $message = "About to:\n\n";
+  $i = 1;
+  foreach ($_deployotron_actions as $action) {
+    if ($action->enabled()) {
+      $message .= ($i++) . ': ' . strtr($action->describe(), array("\n" => "\n   ")) . "\n\n";
+    }
   }
 
-  if (!deployotron_execute_actions($actions, $settings)) {
-    return FALSE;
+  if (drush_get_option('no-confirm', FALSE)) {
+    drush_print($message);
+  }
+  else {
+    $message .= "\nContinue?";
+    if (!drush_confirm($message)) {
+      return drush_user_abort();
+    }
+  }
+
+  $success = FALSE;
+  foreach ($_deployotron_actions as $action) {
+    if ($action->enabled()) {
+      $short = $action->getShort();
+      drush_log($action->getRunMessage(), 'status');
+      $success = $action->run();
+      $_deployotron_rollbacks[] = $action;
+      if (!$success) {
+        drush_log(dt('@action failed.', array('@action' => $short)), 'error');
+        drush_print();
+        return FALSE;
+      }
+      else {
+        drush_log('', 'ok');
+        drush_print();
+      }
+    }
   }
 
   drush_print("Done.");
@@ -113,8 +147,13 @@ function drush_deployotron_deploy($site) {
  * Rollback deploy command.
  */
 function drush_deployotron_deploy_rollback() {
-  global $_deployotron_settings, $_deployotron_rollbacks;
-  if (count($_deployotron_rollbacks)) {
-    deployotron_execute_rollbacks($_deployotron_rollbacks, $settings);
+  global $_deployotron_rollbacks;
+
+  foreach ($_deployotron_rollbacks as $action) {
+    if ($action->enabled()) {
+      if ($action->rollback() !== 'no rollback') {
+        drush_log(dt('Rolled back @action.', array('@action' => $action->getShort())), 'ok');
+      }
+    }
   }
 }
