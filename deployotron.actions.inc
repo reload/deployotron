@@ -324,7 +324,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function getOptions() {
-      return array(
+      return parent::getOptions() + array(
         'branch' => 'Branch to check out.',
         'tag' => 'Tag to check out.',
         'sha' => 'SHA to check out.',
@@ -477,7 +477,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function getOptions() {
-      return array(
+      return parent::getOptions() + array(
         'dump-dir' => 'Directory for database dumps.',
       );
     }
@@ -525,7 +525,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function getOptions() {
-      return array(
+      return parent::getOptions() + array(
         'file' => 'Database dump file to restore.',
       );
     }
@@ -703,7 +703,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function getOptions() {
-      return array(
+      return parent::getOptions() + array(
         'dump-dir' => 'Directory for database dumps.',
       );
     }
