@@ -103,7 +103,7 @@ function drush_deployotron_run_validate($name, $site_alias = NULL) {
   // Copy options from the deployotron key in as command line options.
   if (!empty($site['deployotron'])) {
     foreach ($site['deployotron'] as $option => $value) {
-      drush_set_option($option, $value);
+      drush_set_default($option, $value);
     }
   }
 
