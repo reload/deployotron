@@ -18,6 +18,11 @@ namespace Deployotron {
         'SiteOnline',
         'RestartVarnish',
       ),
+      'omg' => array(
+        'OMGPrepare',
+        'DeployCode',
+        'RestoreDatabase',
+      ),
     );
 
     /**
@@ -51,6 +56,11 @@ namespace Deployotron {
      * The site this action works on.
      */
     protected $site;
+
+    /**
+     * Result object of last drush command.
+     */
+    protected $drushResult;
 
     /**
      * Shas of checkouts of aliases.
@@ -236,8 +246,8 @@ namespace Deployotron {
      *   Whether the command succeeded.
      */
     protected function drush($command, $args = array(), $options = array()) {
-      $res = drush_invoke_process($this->site, $command, $args, $options, TRUE);
-      if (!$res || $res['error_status'] != 0) {
+      $this->drushResult = drush_invoke_process($this->site, $command, $args, $options, TRUE);
+      if (!$this->drushResult || $this->drushResult['error_status'] != 0) {
         return FALSE;
       }
       return TRUE;
@@ -505,6 +515,76 @@ namespace Deployotron\Actions {
   }
 
   /**
+   * Restore database.
+   */
+  class RestoreDatabase extends Action {
+    static protected $runMessage = 'Restoring database';
+    static protected $short = 'restore database';
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOptions() {
+      return array(
+        'file' => 'Database dump file to restore.',
+      );
+    }
+    /**
+     * {@inheritdoc}
+     */
+    public function validate() {
+      if (!drush_get_option('file', NULL)) {
+        return drush_set_error(dt('Missing file.'));
+      }
+
+      return TRUE;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function describe() {
+      return dt("Restore database from @file.", array('@file' => drush_get_option('file', NULL)));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run() {
+      if (!$this->drush('sql-connect', array(), array('pipe' => TRUE))) {
+        return drush_set_error('Error getting database connection setup.');
+      }
+
+      if (!is_string($this->drushResult['object'])) {
+        return drush_set_error('Weird result from sql-connnect.');
+      }
+
+      $command = $this->drushResult['object'];
+
+      if (!$this->sh($command . " < " . drush_get_option('file', NULL))) {
+        drush_print($this->shOutput());
+        return drush_set_error('Error restoring database.');
+      }
+
+      return TRUE;
+    }
+
+    /**
+     * Figure out dump filename.
+     */
+    protected function dumpFilename() {
+      // Because there can pass time between this is called first and last
+      // (--confirm primarily).
+      static $date;
+      if (!$date) {
+        $date = date('Y-m-d\TH:i:s');
+      }
+
+      return sprintf("%s/deploy.%s.%s.sql", drush_get_option('dump-dir', '/tmp'), $date, $this->getHead());
+    }
+  }
+
+  /**
    * Restart Apache2.
    */
   class RestartApache2 extends Action {
@@ -608,6 +688,74 @@ namespace Deployotron\Actions {
       if (!$this->drush('cc', array('all'), array())) {
         return drush_set_error(dt('Error clearing cache.'));
       }
+      return TRUE;
+    }
+  }
+
+  /**
+   * Clear cache.
+   */
+  class OMGPrepare extends Action {
+    static protected $runMessage = 'Preparing';
+    static protected $short = 'preparing';
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOptions() {
+      return array(
+        'dump-dir' => 'Directory for database dumps.',
+      );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validate() {
+      // Try to find some dumps and give them as options for restoring.
+      $regex = '{^deploy\.(\d+-\d+-\d+T\d+:\d+:\d+)\.([0-9a-f]+)\.sql$}';
+      $this->sh('ls ' . drush_get_option('dump-dir', '/tmp'));
+      $listing = $this->shOutput();
+      $dumps = array();
+      foreach (array_reverse(explode("\n", $listing)) as $line) {
+        if (preg_match($regex, $line, $matches)) {
+          $dumps[$matches[1]] = $matches[2];
+        }
+      }
+
+      if (!empty($dumps)) {
+        $date = drush_choice($dumps, dt('Please select a dump.'), '!key (!value)');
+        if ($date) {
+          $sha = $dumps[$date];
+          $file = 'deploy.' . $date . '.' . $sha . '.sql';
+          // We simply set the options so the other actions will see them. The
+          // DeployCode action will check that the SHA is available locally
+          // before validating, so we'll avoid the worst if dumps get mixed up.
+          drush_set_option('sha', $sha);
+          drush_set_option('file', drush_get_option('dump-dir', '/tmp') . '/' . $file);
+          return TRUE;
+        }
+        else {
+          return drush_set_error(dt('Aborting.'));
+        }
+      }
+      else {
+        return drush_set_error(dt('No database dumps found.'));
+      }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function describe() {
+      return "Preparing restore.";
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run() {
+      // Doing nothing.
       return TRUE;
     }
   }

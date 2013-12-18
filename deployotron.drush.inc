@@ -23,6 +23,8 @@ use Deployotron\ActionFactory;
 function deployotron_drush_command() {
   $items['deploy'] = array(
     'description' => 'Deploy site to environment.',
+    'callback' => 'drush_deployotron_run',
+    'callback arguments' => array('deploy'),
     'arguments' => array(
       'site-alias' => 'Site alias to deploy to.',
     ),
@@ -34,6 +36,27 @@ function deployotron_drush_command() {
   foreach (ActionFactory::getActions('deploy') as $action) {
     if ($options = $action->getOptions()) {
       $items['deploy']['options'] += $options;
+    }
+  }
+
+  $items['oh-my-god'] = array(
+    'description' => 'Try to restore a site from a backup.',
+    'callback' => 'drush_deployotron_run',
+    'callback arguments' => array('omg'),
+    'arguments' => array(
+      'site-alias' => 'Site alias to try and save.',
+    ),
+    'options' => array(
+      'no-confirm' => 'Do not require confirmation before running.',
+    ),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
+    'aliases' => array(
+      'omg',
+    ),
+  );
+  foreach (ActionFactory::getActions('omg') as $action) {
+    if ($options = $action->getOptions()) {
+      $items['oh-my-god']['options'] += $options;
     }
   }
 
@@ -54,13 +77,16 @@ function deployotron_drush_help($section) {
     case 'drush:deploy':
       return dt("Deploy site to a specific environment.");
 
+    case 'drush:omg':
+      return dt("Try to find a backup, and restore it to the site.");
+
   }
 }
 
 /**
- * Verify arguments to the deploy command.
+ * Verify arguments to the command.
  */
-function drush_deployotron_deploy_validate($site_alias = NULL) {
+function drush_deployotron_run_validate($name, $site_alias = NULL) {
   // We'd prefer to use something like drush_set_context, but it claims it's for
   // private use, so we'll have to fall back to good old global vars.
   global $_deployotron_actions;
@@ -81,7 +107,7 @@ function drush_deployotron_deploy_validate($site_alias = NULL) {
     }
   }
 
-  $_deployotron_actions = ActionFactory::getActions('deploy', $site);
+  $_deployotron_actions = ActionFactory::getActions($name, $site);
   foreach ($_deployotron_actions as $action) {
     if ($action->enabled()) {
       if (!$action->validate()) {
@@ -95,11 +121,9 @@ function drush_deployotron_deploy_validate($site_alias = NULL) {
 }
 
 /**
- * Action callback.
- *
- * Runs the deployment.
+ * Command callback.
  */
-function drush_deployotron_deploy($site) {
+function drush_deployotron_run($name, $site) {
   global $_deployotron_actions, $_deployotron_rollbacks;
   $_deployotron_rollbacks = array();
 
@@ -146,7 +170,7 @@ function drush_deployotron_deploy($site) {
 /**
  * Rollback deploy command.
  */
-function drush_deployotron_deploy_rollback() {
+function drush_deployotron_run_rollback($name) {
   global $_deployotron_rollbacks;
 
   foreach ($_deployotron_rollbacks as $action) {
