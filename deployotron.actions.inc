@@ -374,6 +374,9 @@ namespace Deployotron\Actions {
         if ($deployed_sha != $this->sha) {
           return drush_set_error(dt('Code not properly deployed Head is at @sha now.', array('@sha' => $deployed_sha)));
         }
+        else {
+          drush_log(dt('HEAD now at @sha', array('@sha' => $deployed_sha)), 'status');
+        }
       }
       else {
         drush_print($this->shOutput());
