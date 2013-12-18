@@ -344,7 +344,7 @@ namespace Deployotron\Actions {
         return drush_set_error(dt('--branch, --tag and --sha are mutually exclusive.'));
       }
       elseif (count($posibilities) < 1) {
-        return drush_set_error(dt('You must provide at least one of --branch, --tag or --sha..'));
+        return drush_set_error(dt('You must provide at least one of --branch, --tag or --sha.'));
       }
 
       // Even if we already have a SHA, we let it through rev-parse. Easy way to
