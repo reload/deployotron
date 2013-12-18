@@ -463,6 +463,15 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
+    public function getOptions() {
+      return array(
+        'dump-dir' => 'Directory for database dumps.',
+      );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function describe() {
       return dt("Dump database to @file.", array('@file' => $this->dumpFilename()));
     }
