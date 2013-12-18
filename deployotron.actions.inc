@@ -307,7 +307,7 @@ namespace Deployotron\Actions {
      */
     public function describe() {
       $this->shLocal('git show --pretty="format:%an <%ae> @ %ci (%cr)%n%n%B" --color --stat ' . $this->sha);
-      return dt("Run git fetch and check out @sha.\n!info", array('@sha' => $this->sha, '!info' => $this->shOutput()));
+      return dt("Run git fetch and check out @sha:\n!info", array('@sha' => $this->sha, '!info' => $this->shOutput()));
     }
 
     /**
@@ -395,7 +395,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function describe() {
-      return dt("Set the site offline");
+      return dt("Set the site offline.");
     }
 
     /**
@@ -429,7 +429,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function describe() {
-      return dt("Set the site online");
+      return dt("Set the site online.");
     }
 
     /**
@@ -464,7 +464,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function describe() {
-      return dt("Dump database to @file", array('@file' => $this->dumpFilename()));
+      return dt("Dump database to @file.", array('@file' => $this->dumpFilename()));
     }
 
     /**
