@@ -693,7 +693,7 @@ namespace Deployotron\Actions {
   }
 
   /**
-   * Clear cache.
+   * Prepare OMG.
    */
   class OMGPrepare extends Action {
     static protected $runMessage = 'Preparing';
