@@ -374,7 +374,13 @@ namespace Deployotron\Actions {
       }
 
       if (!$this->sh('git checkout ' . $this->sha)) {
-        drush_print($this->shOutput());
+        $message = $this->shOutput();
+        if (preg_match('/^fatal: reference is not a tree/', $message)) {
+          drush_log(dt('Could not find SHA, did you forget to push?'), 'error');
+        }
+        else {
+          drush_print($message);
+        }
         return drush_set_error(dt('Could not checkout code.'));
       }
 
