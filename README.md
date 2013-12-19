@@ -24,12 +24,15 @@ codebase in the destination directories.
 Usage
 =====
 
-Use:
+Deploying
+---------
+
+To run the deployment, use a command like:
 
     /var/www/site$ drush deploy @alias
 
-To run the deployment. To get a listing of all supported options, do a
-`drush help deploy`.
+To get a listing of all supported command line options, do a `drush
+help deploy`.
 
 Example configuration:
 
@@ -43,3 +46,17 @@ Example configuration:
         'restart-apache2' => TRUE,
       ),
     );
+
+
+Recovering
+----------
+
+In case everything goes to hell after a deployment, you can do another
+deployment using a known good revision, or use:
+
+    /var/www/site$ drush omg @alias
+
+This will try to find recent database dumps, ask which to use and
+attempt to import the database and revert the codebase to the previous
+revision. It will not attempt to clear caches or restarting any
+services.
