@@ -2,15 +2,6 @@
 /**
  * @file
  * Drush commands for Deployotron!
- *
- * In order to be able to restart apache2/varnish, use the following command to
- * edit a sudoers.d config file:
- *
- * sudo visudo -f /etc/sudoers.d/deployotron
- *
- * And add the following to the file:
- *
- * deploy_user          ALL=(root) NOPASSWD: /usr/sbin/service apache2 restart,/usr/sbin/service varnish restart
  */
 
 require_once 'deployotron.actions.inc';
