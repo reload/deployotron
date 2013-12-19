@@ -14,6 +14,7 @@ namespace Deployotron {
         'DeployCode',
         'RestartApache2',
         'UpdateDatabase',
+        'RunDrakePostUpdate',
         'ClearCache',
         'SiteOnline',
         'RestartVarnish',
@@ -762,6 +763,32 @@ namespace Deployotron\Actions {
      */
     public function run() {
       // Doing nothing.
+      return TRUE;
+    }
+  }
+
+  /**
+   * Run Drake.
+   */
+  class RunDrakePostUpdate extends Action {
+    static protected $runMessage = 'Running drake post-update';
+    static protected $short = 'run drake post-update';
+    static protected $enableSwitch = 'drake-post-update';
+
+    /**
+     * {@inheritdoc}
+     */
+    public function describe() {
+      return "Run drake post-update.";
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run() {
+      if (!$this->drush('drake', array('post-update'), array('no-task-ok' => TRUE))) {
+        return drush_set_error(dt('Error runninng drake.'));
+      }
       return TRUE;
     }
   }
