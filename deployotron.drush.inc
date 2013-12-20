@@ -1,8 +1,11 @@
 <?php
+
 /**
  * @file
  * Drush commands for Deployotron!
  */
+
+define('DEPLOYOTRON_VERSION', '1.0.0');
 
 require_once 'deployotron.actions.inc';
 
