@@ -370,7 +370,14 @@ namespace Deployotron\Actions {
      */
     public function run() {
       if (!$this->sh('git fetch')) {
-        drush_print($this->shOutput());
+        $message = $this->shOutput();
+        if (preg_match('/Permission denied \(publickey\)/', $message)) {
+          drush_log(dt('Access denied to repository URL.'), 'error');
+          drush_log(dt('Ensure that either that the user on the server has access to the repository, or use "ForwardAgent yes" in .ssh/config.'), 'error');
+        }
+        else {
+          drush_print($message);
+        }
         return drush_set_error(dt("Could not fetch from remote repository."));
       }
 
