@@ -17,7 +17,7 @@ use Deployotron\ActionFactory;
 function deployotron_drush_command() {
   $items['deploy'] = array(
     'description' => 'Deploy site to environment.',
-    'callback' => 'drush_deployotron_run',
+    'command-hook' => 'deployotron_run',
     'callback arguments' => array('deploy'),
     'arguments' => array(
       'site-alias' => 'Site alias to deploy to.',
@@ -35,7 +35,7 @@ function deployotron_drush_command() {
 
   $items['oh-my-god'] = array(
     'description' => 'Try to restore a site from a backup.',
-    'callback' => 'drush_deployotron_run',
+    'command-hook' => 'deployotron_run',
     'callback arguments' => array('omg'),
     'arguments' => array(
       'site-alias' => 'Site alias to try and save.',
