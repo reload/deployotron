@@ -657,8 +657,6 @@ namespace Deployotron\Actions {
   /**
    * Update database.
    */
-  function deployotron_deploy_action_update_database($site, $settings) {
-  }
   class UpdateDatabase extends Action {
     static protected $runMessage = 'Running database updates';
     static protected $killSwitch = 'no-updb';
