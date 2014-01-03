@@ -5,7 +5,7 @@
  * Drush commands for Deployotron!
  */
 
-define('DEPLOYOTRON_VERSION', '1.1.2');
+define('DEPLOYOTRON_VERSION', '1.1.3');
 
 require_once 'deployotron.actions.inc';
 
@@ -125,7 +125,7 @@ function drush_deployotron_run($name, $site) {
   $i = 1;
   foreach ($_deployotron_actions as $action) {
     if ($action->enabled()) {
-      $message .= ($i++) . ': ' . strtr($action->describe(), array("\n" => "\n   ")) . "\n\n";
+      $message .= ($i++) . ': ' . strtr($action->getDescription(), array("\n" => "\n   ")) . "\n\n";
     }
   }
 

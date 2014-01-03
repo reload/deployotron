@@ -107,14 +107,22 @@ namespace Deployotron {
     /**
      * Get a description of what the action would do.
      *
-     * Actions are encuraged to override this to provide a more specific
-     * description of the effect of the action. Used when the user provides the
-     * --confirm switch.
+     * If the action subclass defines the $description property, use that, else
+     * returns a generic message.
+     *
+     * If more logic than a static string is needed, subclassesare encouraged to
+     * override this to provide a more specific description of the effect of the
+     * action.
+     *
+     * Used when the user provides the --confirm switch.
      *
      * @return string
      *   Description of the action.
      */
-    public function describe() {
+    public function getDescription() {
+      if (isset(static::$description)) {
+        return static::$description;
+      }
       return dt("Run the @short action.", array('@short' => static::$short));
     }
 
@@ -284,15 +292,9 @@ namespace Deployotron\Actions {
    * Check for locally modified files and do a dry-run checkout.
    */
   class SanityCheck extends Action {
+    static protected $description = 'Check that the git repository is clean.';
     static protected $runMessage = 'Sanity checking';
     static protected $short = 'sanity check';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function describe() {
-      return dt("Check that the git repository is clean.");
-    }
 
     /**
      * {@inheritdoc}
@@ -316,7 +318,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function describe() {
+    public function getDescription() {
       $this->shLocal('git show --pretty="format:%an <%ae> @ %ci (%cr)%n%n%B" --color --stat ' . $this->sha);
       return dt("Run git fetch and check out @sha:\n!info", array('@sha' => $this->sha, '!info' => $this->shOutput()));
     }
@@ -415,16 +417,10 @@ namespace Deployotron\Actions {
    * Set site offline.
    */
   class SiteOffline extends Action {
+    static protected $description = 'Set the site offline.';
     static protected $runMessage = 'Setting site offline';
     static protected $killSwitch = 'no-offline';
     static protected $short = 'set site offline';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function describe() {
-      return dt("Set the site offline.");
-    }
 
     /**
      * {@inheritdoc}
@@ -450,16 +446,10 @@ namespace Deployotron\Actions {
    * Set site online.
    */
   class SiteOnline extends Action {
+    static protected $description = 'Set the site online.';
     static protected $runMessage = 'Setting site online';
     static protected $killSwitch = 'no-offline';
     static protected $short = 'set site online';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function describe() {
-      return dt("Set the site online.");
-    }
 
     /**
      * {@inheritdoc}
@@ -501,7 +491,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function describe() {
+    public function getDescription() {
       return dt("Dump database to @file.", array('@file' => $this->dumpFilename()));
     }
 
@@ -545,6 +535,7 @@ namespace Deployotron\Actions {
         'file' => 'Database dump file to restore.',
       );
     }
+
     /**
      * {@inheritdoc}
      */
@@ -559,7 +550,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function describe() {
+    public function getDescription() {
       return dt("Restore database from @file.", array('@file' => drush_get_option('file', NULL)));
     }
 
@@ -604,17 +595,11 @@ namespace Deployotron\Actions {
    * Restart Apache2.
    */
   class RestartApache2 extends Action {
+    static protected $description = 'Restart Apache2.';
     static protected $runMessage = 'Restarting Apache2';
     static protected $enableSwitch = 'restart-apache2';
     static protected $killSwitch = 'no-restart-apache2';
     static protected $short = 'restart apache2';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function describe() {
-      return dt("Restart Apache2.");
-    }
 
     /**
      * {@inheritdoc}
@@ -631,17 +616,11 @@ namespace Deployotron\Actions {
    * Restart Varnish.
    */
   class RestartVarnish extends Action {
+    static protected $description = 'Restart Varnish.';
     static protected $runMessage = 'Restarting Varnish';
     static protected $enableSwitch = 'restart-varnish';
     static protected $killSwitch = 'no-restart-varnish';
     static protected $short = 'restart varnish';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function describe() {
-      return dt("Restart Varnish");
-    }
 
     /**
      * {@inheritdoc}
@@ -658,16 +637,10 @@ namespace Deployotron\Actions {
    * Update database.
    */
   class UpdateDatabase extends Action {
+    static protected $description = 'Update database schema.';
     static protected $runMessage = 'Running database updates';
     static protected $killSwitch = 'no-updb';
     static protected $short = 'update database schema';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function describe() {
-      return dt("Update database schema.");
-    }
 
     /**
      * {@inheritdoc}
@@ -684,16 +657,10 @@ namespace Deployotron\Actions {
    * Clear cache.
    */
   class ClearCache extends Action {
+    static protected $description = 'Clear all Drupal caches.';
     static protected $runMessage = 'Clearing caches';
     static protected $short = 'cache clear';
     static protected $killSwitch = 'no-cc-all';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function describe() {
-      return "Clear all Drupal caches.";
-    }
 
     /**
      * {@inheritdoc}
@@ -710,6 +677,7 @@ namespace Deployotron\Actions {
    * Prepare OMG.
    */
   class OMGPrepare extends Action {
+    static protected $description = 'Preparing restore.';
     static protected $runMessage = 'Preparing';
     static protected $short = 'preparing';
 
@@ -761,13 +729,6 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function describe() {
-      return "Preparing restore.";
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function run() {
       // Doing nothing.
       return TRUE;
@@ -778,16 +739,10 @@ namespace Deployotron\Actions {
    * Run Drake.
    */
   class RunDrakePostUpdate extends Action {
+    static protected $description = 'Run drake post-update.';
     static protected $runMessage = 'Running drake post-update';
     static protected $short = 'run drake post-update';
     static protected $enableSwitch = 'drake-post-update';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function describe() {
-      return "Run drake post-update.";
-    }
 
     /**
      * {@inheritdoc}
