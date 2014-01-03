@@ -416,6 +416,7 @@ namespace Deployotron\Actions {
    */
   class SiteOffline extends Action {
     static protected $runMessage = 'Setting site offline';
+    static protected $killSwitch = 'no-offline';
     static protected $short = 'set site offline';
 
     /**
@@ -450,6 +451,7 @@ namespace Deployotron\Actions {
    */
   class SiteOnline extends Action {
     static protected $runMessage = 'Setting site online';
+    static protected $killSwitch = 'no-offline';
     static protected $short = 'set site online';
 
     /**
