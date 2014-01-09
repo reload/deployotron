@@ -5,7 +5,7 @@
  * Drush commands for Deployotron!
  */
 
-define('DEPLOYOTRON_VERSION', '1.1.3');
+define('DEPLOYOTRON_VERSION', '1.1.4');
 
 require_once 'deployotron.actions.inc';
 
@@ -117,9 +117,10 @@ function drush_deployotron_run_validate($name, $site_alias = NULL) {
 /**
  * Command callback.
  */
-function drush_deployotron_run($name, $site) {
+function drush_deployotron_run($name, $site_alias) {
   global $_deployotron_actions, $_deployotron_rollbacks;
   $_deployotron_rollbacks = array();
+  $site = drush_sitealias_get_record($site_alias);
 
   $message = "About to:\n\n";
   $i = 1;
@@ -127,6 +128,13 @@ function drush_deployotron_run($name, $site) {
     if ($action->enabled()) {
       $message .= ($i++) . ': ' . strtr($action->getDescription(), array("\n" => "\n   ")) . "\n\n";
     }
+  }
+
+  $confirm_message = trim(drush_get_option('message', NULL) . "\n\n" .
+                     drush_get_option('confirm_message', NULL) . "\n\n" .
+                     drush_get_option('confirm_message_' . $name, NULL));
+  if (!empty($confirm_message)) {
+    $message .= $confirm_message . "\n\n";
   }
 
   if (drush_get_option('no-confirm', FALSE)) {
@@ -156,6 +164,13 @@ function drush_deployotron_run($name, $site) {
         drush_print();
       }
     }
+  }
+
+  $done_message = trim(drush_get_option('message', NULL) . "\n\n" .
+                  drush_get_option('done_message', NULL) . "\n\n" .
+                  drush_get_option('done_message_' . $name, NULL));
+  if (!empty($done_message)) {
+    $message .=  "\n\n" . $done_message ;
   }
 
   drush_print("Done.");
