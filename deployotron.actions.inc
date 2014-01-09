@@ -319,8 +319,16 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function getDescription() {
-      $this->shLocal('git show --pretty="format:%an <%ae> @ %ci (%cr)%n%n%B" --color --stat ' . $this->sha);
-      return dt("Run git fetch and check out @sha:\n!info", array('@sha' => $this->sha, '!info' => $this->shOutput()));
+      $this->shLocal('git log --pretty="format:%an <%ae> @ %ci (%cr)%n%n%B" --color --no-walk ' . $this->sha);
+      $commit = $this->shOutput();
+      $this->shLocal('git diff --color --stat ' . $this->getHead() . ' ' . $this->sha);
+      $stat = $this->shOutput();
+      $stat = explode("\n", $stat);
+      if (count($stat) > 20) {
+        $stat = array_merge(array_slice($stat, 0, 8), array('', ' ...', ''), array_slice($stat, -8));
+      }
+
+      return dt("Run git fetch and check out @sha:\n!info", array('@sha' => $this->sha, '!info' => $commit . "\n\nAll changes:\n" . implode("\n", $stat)));
     }
 
     /**
