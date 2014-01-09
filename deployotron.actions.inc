@@ -395,10 +395,10 @@ namespace Deployotron\Actions {
       }
 
       // An extra safety check to make sure that things are as we think.
-      if ($this->shLocal('git rev-parse HEAD')) {
-        $deployed_sha = trim($this->shOutput());
+      $deployed_sha = $this->getHead();
+      if ($deployed_sha) {
         if ($deployed_sha != $this->sha) {
-          return drush_set_error(dt('Code not properly deployed Head is at @sha now.', array('@sha' => $deployed_sha)));
+          return drush_set_error(dt('Code not properly deployed, head is at @sha now.', array('@sha' => $deployed_sha)));
         }
         else {
           drush_log(dt('HEAD now at @sha', array('@sha' => $deployed_sha)), 'status');
