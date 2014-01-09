@@ -264,10 +264,13 @@ namespace Deployotron {
 
     /**
      * Get the current git head revision.
+     *
+     * @param bool $no_cache
+     *   Dont't use cache, but fetch anyway.
      */
-    protected function getHead() {
+    protected function getHead($no_cache = FALSE) {
       $name = $this->site['#name'];
-      if (!isset(self::$headShas[$name])) {
+      if (!isset(self::$headShas[$name]) || $no_cache) {
         self::$headShas[$name] = '';
         $exec = drush_shell_proc_build($this->site, "git rev-parse HEAD", TRUE);
         // Return code 0 = success.
@@ -403,7 +406,7 @@ namespace Deployotron\Actions {
       }
 
       // An extra safety check to make sure that things are as we think.
-      $deployed_sha = $this->getHead();
+      $deployed_sha = $this->getHead(TRUE);
       if ($deployed_sha) {
         if ($deployed_sha != $this->sha) {
           return drush_set_error(dt('Code not properly deployed, head is at @sha now.', array('@sha' => $deployed_sha)));
