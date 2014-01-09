@@ -5,7 +5,7 @@
  * Drush commands for Deployotron!
  */
 
-define('DEPLOYOTRON_VERSION', '1.1.7');
+define('DEPLOYOTRON_VERSION', '1.1.8');
 
 require_once 'deployotron.actions.inc';
 
@@ -170,7 +170,7 @@ function drush_deployotron_run($name, $site_alias) {
                   drush_get_option('done_message', NULL) . "\n\n" .
                   drush_get_option('done_message_' . $name, NULL));
   if (!empty($done_message)) {
-    $message .=  "\n\n" . $done_message ;
+    drush_print("\n\n" . $done_message);
   }
 
   drush_print("Done.");
