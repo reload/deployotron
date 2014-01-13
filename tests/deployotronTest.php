@@ -5,7 +5,7 @@
  * PHPUnit Tests for Deployotron.
  */
 
-define('DEPLOYOTRON_SITE_REPO', 'https://github.com/xendk/deployotron_testsite.git');
+define('DEPLOYOTRON_SITE_REPO', 'https://github.com/reload/deployotron_testsite.git');
 
 /**
  * Deployotron testing class.
