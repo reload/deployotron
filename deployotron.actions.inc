@@ -209,7 +209,18 @@ namespace Deployotron {
      *   Whether the command succeeded.
      */
     protected function sh($command) {
-      $exec = drush_shell_proc_build($this->site, $command, TRUE);
+      $exec = $command;
+      // Check that there is a remote host before trying to construct a remote
+      // command.
+      $host = drush_remote_host($this->site);
+      if (!empty($host)) {
+        $exec = drush_shell_proc_build($this->site, $command, TRUE);
+      }
+      else {
+        // Else just cd to the root of the alias. This allows us to test the
+        // code without a remote host.
+        $exec = "cd " . drush_escapeshellarg($this->site['root']) . " && " . $exec;
+      }
       return $this->shLocal($exec);
     }
 
