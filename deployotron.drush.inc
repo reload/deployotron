@@ -5,7 +5,7 @@
  * Drush commands for Deployotron!
  */
 
-define('DEPLOYOTRON_VERSION', '1.1.8');
+define('DEPLOYOTRON_VERSION', '1.1.9');
 
 require_once 'deployotron.actions.inc';
 
