@@ -272,10 +272,8 @@ namespace Deployotron {
       $name = $this->site['#name'];
       if (!isset(self::$headShas[$name]) || $no_cache) {
         self::$headShas[$name] = '';
-        $exec = drush_shell_proc_build($this->site, "git rev-parse HEAD", TRUE);
-        // Return code 0 = success.
-        if (drush_shell_exec($exec)) {
-          self::$headShas[$name] = trim(implode("\n", drush_shell_exec_output()));
+        if ($this->sh('git rev-parse HEAD')) {
+          self::$headShas[$name] = trim($this->shOutput());
         }
       }
       return self::$headShas[$name];
