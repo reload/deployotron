@@ -1,0 +1,14 @@
+# Configuration for Travis CI at http://travis-ci.org/#!/xendk/drake
+language: php
+php:
+  - 5.3
+env:
+  - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=5.10.0.0
+  - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=6.2.0.0
+install:
+  - pear channel-discover pear.drush.org
+  - pear install drush/drush-$DRUSH_VERSION
+  - phpenv rehash
+before_script:
+  - export BOOTSTRAP=`pear list-files drush/drush-$DRUSH_VERSION | grep drush_testcase.inc | awk '{print $2}'`
+script: phpunit --bootstrap=$BOOTSTRAP tests
