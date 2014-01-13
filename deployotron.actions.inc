@@ -301,8 +301,13 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function run() {
-      if (!$this->sh('git status -s')) {
+      // http://stackoverflow.com/questions/3878624/how-do-i-programmatically-determine-if-there-are-uncommited-changes
+      // claims this is the proper way. I'm inclined to agree.
+      if (!$this->sh('git diff-files --quiet --ignore-submodules --')) {
         return drush_set_error(dt('Repository not clean.'));
+      }
+      if (!$this->sh('git diff-index --cached --quiet HEAD --ignore-submodules --')) {
+        return drush_set_error(dt('Uncommitted changes in the index.'));
       }
 
       return TRUE;
