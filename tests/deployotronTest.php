@@ -76,6 +76,8 @@ class DrakeCase extends Drush_CommandTestCase {
    */
   public function testBasic() {
     // Simple test to see if the deploy command is available.
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
     $this->drush('help', array('deploy'), array(), NULL, $this->webroot());
     $this->assertRegExp('/Deploy site to a specific environment/', $this->getOutput());
 
