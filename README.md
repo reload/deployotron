@@ -3,6 +3,8 @@ Deployotron
 
 This is our back to basics deploy script.
 
+[![Build Status](https://travis-ci.org/reload/deployotron.png?branch=master)](https://travis-ci.org/reload/deployotron)
+
 Setup
 =====
 
