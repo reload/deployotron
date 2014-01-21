@@ -12,3 +12,5 @@ install:
 before_script:
   - export BOOTSTRAP=`pear list-files drush/drush-$DRUSH_VERSION | grep drush_testcase.inc | awk '{print $2}'`
 script: phpunit --bootstrap=$BOOTSTRAP tests
+notifications:
+  flowdock: 78b17a3314f1bac5207d8e65e391287b
