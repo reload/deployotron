@@ -1,7 +1,30 @@
 Deployotron
 ===========
 
-This is our back to basics deploy script.
+Deployotron is a Drush command to simplify deploying new code to a
+Drupal site.
+
+There's already a lot of ways to deploy ones Drupal site, from FTPing
+up the files to having Capistrano deploy the site when the build
+passes in Jenkins. Deployotron aims to be simple to use, but also
+usable as a part of a bigger setup.
+
+Overview
+========
+
+In order to keep things simple, we're working with a few assumptions:
+
+That the code is in GIT, and that the root of the site is checked in.
+
+That you can run Drush commands and GIT on the live webserver and the
+root of the site on the webserver is a git checkout, and
+
+That you've set up Drush aliases to reach the live webserver.
+
+For everyone's sanity, we suggest having a Drush alias file in
+sites/all/drush/<short-site-alias>.aliases.drushrc.php that defines
+relevant environments (production, dev, etc.), so that everybody is
+using the same settings.
 
 [![Build Status](https://travis-ci.org/reload/deployotron.png?branch=master)](https://travis-ci.org/reload/deployotron)
 
