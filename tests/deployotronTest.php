@@ -60,8 +60,10 @@ class DrakeCase extends Drush_CommandTestCase {
     // Finally, we need to install the deployotron drush command.
     mkdir($site_drush . '/deployotron', 0777, TRUE);
     $deployotron_dir = dirname(__DIR__);
-    // Using a wildcard to skip hidden files (.git, etc).
-    `cp -r $deployotron_dir/* $site_drush/deployotron`;
+    // Symlinking files in, in order to play nice with test coverage
+    // reporting.
+    symlink($deployotron_dir . '/deployotron.drush.inc', $site_drush . '/deployotron/deployotron.drush.inc');
+    symlink($deployotron_dir . '/deployotron.actions.inc', $site_drush . '/deployotron/deployotron.actions.inc');
   }
 
   /**
