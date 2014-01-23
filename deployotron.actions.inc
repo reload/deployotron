@@ -47,7 +47,7 @@ namespace Deployotron {
    */
   abstract class Action {
     /**
-     * Set a default short description. Also @see isKillSwitched().
+     * Set a default short description.
      */
     static protected $short = "Incompletly implemented action.";
 
