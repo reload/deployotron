@@ -54,6 +54,14 @@ function deployotron_drush_command() {
     }
   }
 
+  $items['deployotron-actions'] = array(
+    'description' => 'Display the actions run by deployotron.',
+    'hidden' => TRUE,
+    'topic' => TRUE,
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUSH,
+    'callback' => 'deployotron_print_actions',
+  );
+
   return $items;
 }
 
@@ -189,4 +197,11 @@ function drush_deployotron_run_rollback($name) {
       }
     }
   }
+}
+
+/**
+ * Callback for topic depoloyotron-actions.
+ */
+function deployotron_print_actions() {
+  ActionFactory::getHelp();
 }

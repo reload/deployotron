@@ -40,6 +40,45 @@ namespace Deployotron {
         return $actions;
       }
     }
+
+    static public function getHelp() {
+      $all_actions = array();
+      drush_print('Commands');
+      drush_print('--------');
+      foreach (static::$actionMapping as $name => $actions) {
+        drush_print(wordwrap(dt("@name runs the actions: @actions", array('@name' => $name, '@actions' => implode(', ', $actions)))));
+        drush_print();
+
+        $all_actions = array_merge($all_actions, $actions);
+      }
+      $all_actions = array_unique($all_actions);
+      sort($all_actions);
+
+      drush_print('Actions');
+      drush_print('-------');
+      foreach ($all_actions as $class_name) {
+        drush_print($class_name . ':');
+        $class_name = '\\Deployotron\\Actions\\' . $class_name;
+        drush_print($class_name::getHelp());
+        drush_print();
+
+        // Print options.
+        // @todo Shouldn't really be necessary to instantiate the class to get
+        //   the options.
+        $action = new $class_name('@none');
+        $options = $action->getOptions();
+        if ($options) {
+          $table = array(array('Options:'));
+          foreach ($options as $name => $desc) {
+            $table[] = array('label' => '--' . $name, 'desc' => $desc);
+          }
+          drush_print_table($table, TRUE, array('label' => 40));
+          drush_print();
+        }
+        drush_print();
+      }
+
+    }
   }
 
   /**
@@ -67,6 +106,16 @@ namespace Deployotron {
      * Shas of checkouts of aliases.
      */
     static protected $headShas = array();
+
+    public static function getHelp() {
+      if (isset(static::$help)) {
+        return static::$help;
+      }
+      if (isset(static::$description)) {
+        return static::$description;
+      }
+      return "No description.";
+    }
 
     /**
      * Construct a new Action object.
@@ -331,6 +380,7 @@ namespace Deployotron\Actions {
   class DeployCode extends Action {
     static protected $runMessage = 'Deploying';
     static protected $short = 'deploy code';
+    static protected $help = 'Checks out a specified branch/tag/sha on the site.';
 
     /**
      * {@inheritdoc}
@@ -503,6 +553,7 @@ namespace Deployotron\Actions {
     static protected $runMessage = 'Dumping database';
     static protected $killSwitch = 'no-dump';
     static protected $short = 'dump database';
+    static protected $help = 'Makes a SQL dump of the site database.';
 
     /**
      * {@inheritdoc}
@@ -662,7 +713,7 @@ namespace Deployotron\Actions {
    * Update database.
    */
   class UpdateDatabase extends Action {
-    static protected $description = 'Update database schema.';
+    static protected $description = 'Runs database updates (as with update.php).';
     static protected $runMessage = 'Running database updates';
     static protected $killSwitch = 'no-updb';
     static protected $short = 'update database schema';
@@ -702,9 +753,10 @@ namespace Deployotron\Actions {
    * Prepare OMG.
    */
   class OMGPrepare extends Action {
-    static protected $description = 'Preparing restore.';
+    static protected $description = 'Prepare restore.';
     static protected $runMessage = 'Preparing';
     static protected $short = 'preparing';
+    static protected $help = 'Prepares restoring by looking for dumps to import.';
 
     /**
      * {@inheritdoc}
