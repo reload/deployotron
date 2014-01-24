@@ -232,7 +232,17 @@ namespace Deployotron {
      *   The output.
      */
     protected function shOutput() {
-      return implode("\n", drush_shell_exec_output());
+      return implode("\n",  $this->shOutputArray());
+    }
+
+    /**
+     * Get the output of the most recent command as an array.
+     *
+     * @return array
+     *   Lines of output.
+     */
+    protected function shOutputArray() {
+      return drush_shell_exec_output();
     }
 
     /**
@@ -281,10 +291,15 @@ namespace Deployotron {
      *
      * @return string The SHA to deploy.
      */
-    protected function getSha() {
-      $branch = drush_get_option('branch', NULL);
-      $tag = drush_get_option('tag', NULL);
-      $sha = drush_get_option('sha', NULL);
+    protected function pickSha($options = array()) {
+      $options += array(
+        'branch' => NULL,
+        'tag' => NULL,
+        'sha' => NULL,
+      );
+      $branch = $options['branch'];
+      $tag = $options['tag'];
+      $sha = $options['sha'];
 
       $posibilities = array_filter(array($branch, $tag, $sha));
       if (count($posibilities) > 1) {
@@ -301,10 +316,10 @@ namespace Deployotron {
       }
       else {
         if (!empty($sha)) {
-          throw new \Exception(dt('Unknown SHA.'));
+          return drush_set_error(dt('Unknown SHA.'));
         }
         else {
-          throw new \Exception(dt('Error finding SHA for ' . (!empty($branch) ? 'branch' : 'tag') . '.'));
+          return drush_set_error(dt('Error finding SHA for ' . (!empty($branch) ? 'branch' : 'tag') . '.'));
         }
       }
 
@@ -401,12 +416,15 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function validate() {
-      try {
-        $this->getSha();
+      $options = array(
+        'branch' => drush_get_option('branch', NULL),
+        'tag' => drush_get_option('tag', NULL),
+        'sha' => drush_get_option('sha', NULL),
+      );
+      if ($this->sha = $this->pickSha($options)) {
         return TRUE;
-      } catch (\Exception $e) {
-        return drush_set_error($e->getMessage());
       }
+      return FALSE;
     }
 
     /**
@@ -805,6 +823,18 @@ namespace Deployotron\Actions {
     static protected $runMessage = 'Creating VERSION.txt';
     static protected $short = 'create VERSION.txt';
     static protected $killSwitch = 'no-create-version-txt';
+    static protected $versionTxt = NULL;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOptions() {
+      return parent::getOptions() + array(
+        'branch' => 'Branch to check out.',
+        'tag' => 'Tag to check out.',
+        'sha' => 'SHA to check out.',
+      );
+    }
 
     /**
      * Returns a formatted string containing content for
@@ -812,28 +842,41 @@ namespace Deployotron\Actions {
      *
      * @return string
      */
-    private function generateVersionTxt() {
-      $sha = $this->getSha();
-      $this->shLocal('git tag --points-at '. $sha);
-      $tags = $this->shOutput();
+    protected function generateVersionTxt() {
+      if (empty($this->versionTxt)) {
+        $options = array(
+          'branch' => drush_get_option('branch', NULL),
+          'tag' => drush_get_option('tag', NULL),
+          'sha' => drush_get_option('sha', NULL),
+        );
+        $sha = $this->pickSha($options);
+        $this->shLocal('git tag --points-at '. $sha);
+        $tags = implode(', ', $this->shOutputArray());
+        $branch = drush_get_option('branch', NULL);
 
-      $versionTxt = array(
-        'Deployment info',
-        '------------',
-        'Branch: ' . drush_get_option('branch', NULL),
-        'Tags: ' . $tags,
-        'SHA: ' . $sha,
-        'Time of deployment: ' . date('r'),
-        'Deployer: ' . $_SERVER['USER'],
-      );
-      return implode("\n", $versionTxt);
+        $version_txt = array();
+        $version_txt[] = 'Deployment info';
+        $version_txt[] = '---------------';
+        if ($branch) {
+          $version_txt[] = 'Branch: ' . $branch;
+        }
+        if (!empty($tags)) {
+          $version_txt[] = 'Tags: ' . $tags;
+        }
+        $version_txt[] = 'SHA: ' . $sha;
+        $version_txt[] = 'Time of deployment: ' . date('r');
+        $version_txt[] = 'Deployer: ' . $_SERVER['USER'] . '@' . php_uname('n');
+
+        $this->versionTxt = implode("\n", $version_txt);
+      }
+      return $this->versionTxt;
     }
 
     /**
      * {@inheritdoc}
      */
     public function getDescription() {
-      return self::$description . ":\n". $this->generateVersionTxt();
+      return self::$description . ":\n" . $this->generateVersionTxt();
     }
 
     /**
@@ -842,7 +885,7 @@ namespace Deployotron\Actions {
     public function run() {
       // Delete any pre-existing VERSION.txt file and create a new one.
       $this->sh('rm VERSION.txt');
-      $this->sh('echo "' . $this->generateVersionTxt() . '" > VERSION.txt');
+      $this->sh('echo ' . escapeshellarg($this->generateVersionTxt()) . ' > VERSION.txt');
     }
   }
 }
