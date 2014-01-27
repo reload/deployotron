@@ -19,6 +19,7 @@ namespace Deployotron {
         'ClearCache',
         'SiteOnline',
         'RestartVarnish',
+        'FlowDockNotificaton',
       ),
       'omg' => array(
         'OMGPrepare',
@@ -210,13 +211,14 @@ namespace Deployotron {
     /**
      * Run the task.
      *
-     * @param array $site
-     *   Site alias to run action on.
+     * @param array $state
+     *   Persistent state array that actions can use to communicate with
+     *   following actions.
      *
      * @return bool
      *   Success or failure.
      */
-    public function run($site) {
+    public function run($state) {
       return FALSE;
     }
 
@@ -413,7 +415,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       // http://stackoverflow.com/questions/3878624/how-do-i-programmatically-determine-if-there-are-uncommited-changes
       // claims this is the proper way. I'm inclined to agree.
       if (!$this->sh('git diff-files --quiet --ignore-submodules --')) {
@@ -480,7 +482,12 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
+      // Some useful information for other actions.
+      $state['requested_branch'] = drush_get_option('branch', NULL);
+      $state['requested_tag'] = drush_get_option('tag', NULL);
+      $state['requested_sha'] = drush_get_option('sha', NULL);
+
       if (!$this->sh('git fetch')) {
         $message = $this->shOutput();
         if (preg_match('/Permission denied \(publickey\)/', $message)) {
@@ -512,6 +519,7 @@ namespace Deployotron\Actions {
         }
         else {
           drush_log(dt('HEAD now at @sha', array('@sha' => $deployed_sha)), 'status');
+          $state['deployed_sha'] = $deployed_sha;
         }
       }
       else {
@@ -535,7 +543,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->drush('variable-set', array('maintainance_mode', 1))) {
         return drush_set_error(dt('Error setting site offline.'));
       }
@@ -564,7 +572,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->drush('variable-set', array('maintainance_mode', 0))) {
         return drush_set_error(dt('Error setting site online.'));
       }
@@ -609,10 +617,11 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->drush('sql-dump', array(), array('no-ordered-dump' => TRUE, 'result-file' => $this->dumpFilename()))) {
         return drush_set_error('Error dumping database.');
       }
+      $state['database_dump'] = $this->dumpFilename();
       return TRUE;
     }
 
@@ -668,7 +677,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->drush('sql-connect', array(), array('pipe' => TRUE))) {
         return drush_set_error('Error getting database connection setup.');
       }
@@ -715,7 +724,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->sh('sudo service apache2 restart')) {
         return drush_set_error(dt('Error restarting apache2.'), 'error');
       }
@@ -736,7 +745,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->sh('sudo service varnish restart')) {
         return drush_set_error(dt('Error restarting varnish.'), 'error');
       }
@@ -756,7 +765,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->drush('updb', array(), array('yes' => TRUE))) {
         return drush_set_error(dt('Error running database updates.'));
       }
@@ -776,7 +785,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->drush('cc', array('all'), array())) {
         return drush_set_error(dt('Error clearing cache.'));
       }
@@ -841,7 +850,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       // Doing nothing.
       return TRUE;
     }
@@ -859,7 +868,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run() {
+    public function run($state) {
       if (!$this->drush('drake', array('post-update'), array('no-task-ok' => TRUE))) {
         return drush_set_error(dt('Error runninng drake.'));
       }
@@ -880,64 +889,103 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function getOptions() {
-      return parent::getOptions() + array(
-        'branch' => 'Branch to check out.',
-        'tag' => 'Tag to check out.',
-        'sha' => 'SHA to check out.',
-      );
-    }
-
-    /**
-     * Returns a formatted string containing content for
-     * a version TXT file.
-     *
-     * @return string
-     */
-    protected function generateVersionTxt() {
-      if (empty($this->versionTxt)) {
-        $options = array(
-          'branch' => drush_get_option('branch', NULL),
-          'tag' => drush_get_option('tag', NULL),
-          'sha' => drush_get_option('sha', NULL),
-        );
-        $sha = $this->pickSha($options);
-        $this->shLocal('git tag --points-at ' . $sha);
+    public function run($state) {
+      if (!empty($state['deployed_sha'])) {
+        // Ask git which tags points to this commit.
+        $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
-        $branch = drush_get_option('branch', NULL);
 
         $version_txt = array();
         $version_txt[] = 'Deployment info';
         $version_txt[] = '---------------';
-        if ($branch) {
-          $version_txt[] = 'Branch: ' . $branch;
+        if (!empty($state['requested_branch'])) {
+          $version_txt[] = 'Branch: ' . $state['requested_branch'];
         }
         if (!empty($tags)) {
           $version_txt[] = 'Tags: ' . $tags;
         }
-        $version_txt[] = 'SHA: ' . $sha;
+        $version_txt[] = 'SHA: ' . $state['deployed_sha'];
         $version_txt[] = 'Time of deployment: ' . date('r');
         $version_txt[] = 'Deployer: ' . $_SERVER['USER'] . '@' . php_uname('n');
 
-        $this->versionTxt = implode("\n", $version_txt);
+        // Delete any pre-existing VERSION.txt file and create a new one.
+        $this->sh('rm VERSION.txt');
+        // You'd think that echo would do the job, but it's not consistent
+        // across shells. Bash and most /bin/echo requires the -n option to
+        // expand \n to a newline, while /bin/sh built-in echo doesn't and
+        // prints the -n as part of the output. But printf works the same and is
+        // POSIX 7, which should cover our bases.
+        $this->sh('printf ' . escapeshellarg(implode("\\n", $version_txt) . "\\n") . ' > VERSION.txt');
       }
-      return $this->versionTxt;
+      else {
+        drush_log(dt('No version deployed, not creating/updating VERSION.txt.'), 'warning');
+      }
+      return TRUE;
+    }
+  }
+
+  /**
+   * Send a notification to FlowDock.
+   */
+  class FlowDockNotificaton extends Action {
+    static protected $description = 'Notify on FlowDock.';
+    static protected $runMessage = 'Notifying on FlowDock.';
+    static protected $short = 'notify on FlowDock';
+    static protected $enableSwitch = 'flowdock-token';
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOptions() {
+      return parent::getOptions() + array(
+        'flowdock-token' => 'FlowDock token.',
+      );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getDescription() {
-      return self::$description . ":\n" . $this->generateVersionTxt();
-    }
+    public function run($state) {
+      if (!empty($state['deployed_sha'])) {
+        $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
+        $tags = implode(', ', $this->shOutputArray());
 
-    /**
-     * {@inheritdoc}
-     */
-    public function run() {
-      // Delete any pre-existing VERSION.txt file and create a new one.
-      $this->sh('rm VERSION.txt');
-      $this->sh('echo -e ' . escapeshellarg(strtr($this->generateVersionTxt(), array("\n" => "\\n"))) . ' > VERSION.txt');
+        $subject = 'Deployment to ' . $this->site['remote-user'] . '@' .
+          $this->site['remote-host'] . ':' . $this->site['root'];
+
+        $body = 'SHA: ' . $state['deployed_sha'] .
+          (!empty($state['requested_branch']) ? '<br />Branch: ' . $state['requested_branch'] : '') .
+          (!empty($tags) ? '<br />Tags: ' . $tags : '');
+
+        $data = array(
+          'source' => 'Deployontron',
+          'from_address' => 'deployotron@reload.dk',
+          'subject' => $subject,
+          'content' => $body,
+          'tags' => array('deployotron', $this->site['#name']),
+        );
+        $data = json_encode($data);
+
+        $service_url = 'https://api.flowdock.com/v1/messages/team_inbox/' . drush_get_option('flowdock-token', '');
+
+        $curl = curl_init($service_url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($curl, CURLOPT_POST, TRUE);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($data))
+        );
+
+        $curl_response = curl_exec($curl);
+        if ($curl_response != '{}') {
+          drush_log(dt('Unexpected response from FlowDock: @response', array('@response' => $curl_response)), 'warning');
+        }
+        curl_close($curl);
+      }
+      else {
+        drush_log(dt('No version deployed, not notifying FlowDock.'), 'warning');
+      }
       return TRUE;
     }
   }
