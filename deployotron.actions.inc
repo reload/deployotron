@@ -902,7 +902,7 @@ namespace Deployotron\Actions {
           'sha' => drush_get_option('sha', NULL),
         );
         $sha = $this->pickSha($options);
-        $this->shLocal('git tag --points-at '. $sha);
+        $this->shLocal('git tag --points-at ' . $sha);
         $tags = implode(', ', $this->shOutputArray());
         $branch = drush_get_option('branch', NULL);
 
