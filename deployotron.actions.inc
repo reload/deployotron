@@ -19,6 +19,7 @@ namespace Deployotron {
         'ClearCache',
         'SiteOnline',
         'RestartVarnish',
+        'FlowDockNotificaton',
       ),
       'omg' => array(
         'OMGPrepare',
@@ -938,6 +939,59 @@ namespace Deployotron\Actions {
       // Delete any pre-existing VERSION.txt file and create a new one.
       $this->sh('rm VERSION.txt');
       $this->sh('echo -e ' . escapeshellarg(strtr($this->generateVersionTxt(), array("\n" => "\\n"))) . ' > VERSION.txt');
+      return TRUE;
+    }
+  }
+
+  /**
+   * Send a notification to FlowDock.
+   */
+  class FlowDockNotificaton extends Action {
+    static protected $description = 'Notify on FlowDock.';
+    static protected $runMessage = 'Notifying on FlowDock.';
+    static protected $short = 'notify on FlowDock';
+    static protected $enableSwitch = 'flowdock-token';
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOptions() {
+      return parent::getOptions() + array(
+        'flowdock-token' => 'FlowDock token.',
+      );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run() {
+      $data = array(
+        'source' => 'Deployontron',
+        'from_address' => 'deployotron@reload.dk',
+        'subject' => 'Deployment complete',
+        'content' => 'Stuff pushed...',
+        'tags' => array('deployotron'),
+      );
+      $data = json_encode($data);
+
+      $service_url = 'https://api.flowdock.com/v1/messages/team_inbox/' . drush_get_option('flowdock-token', '');
+
+      $curl = curl_init($service_url);
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+      curl_setopt($curl, CURLOPT_POST, TRUE);
+      curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+      curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+          'Content-Type: application/json',
+          'Content-Length: ' . strlen($data))
+      );
+
+      $curl_response = curl_exec($curl);
+      $flowdock_response = json_decode($curl_response);
+      if (!empty($flowdock_response)) {
+        drush_log(dt('Unexpected response from FlowDock: @response', array('@response' => $curl_response)), 'warning');
+      }
+      curl_close($curl);
+
       return TRUE;
     }
   }
