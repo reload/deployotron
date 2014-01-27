@@ -12,6 +12,7 @@ namespace Deployotron {
         'SiteOffline',
         'BackupDatabase',
         'DeployCode',
+        'CreateVersionTxt',
         'RestartApache2',
         'UpdateDatabase',
         'RunDrakePostUpdate',
@@ -280,7 +281,17 @@ namespace Deployotron {
      *   The output.
      */
     protected function shOutput() {
-      return implode("\n", drush_shell_exec_output());
+      return implode("\n",  $this->shOutputArray());
+    }
+
+    /**
+     * Get the output of the most recent command as an array.
+     *
+     * @return array
+     *   Lines of output.
+     */
+    protected function shOutputArray() {
+      return drush_shell_exec_output();
     }
 
     /**
@@ -320,6 +331,48 @@ namespace Deployotron {
         return FALSE;
       }
       return TRUE;
+    }
+
+    /**
+     * Get the SHA to deploy.
+     *
+     * This is based on options from configuration or command.
+     *
+     * @return string The SHA to deploy.
+     */
+    protected function pickSha($options = array()) {
+      $options += array(
+        'branch' => NULL,
+        'tag' => NULL,
+        'sha' => NULL,
+      );
+      $branch = $options['branch'];
+      $tag = $options['tag'];
+      $sha = $options['sha'];
+
+      $posibilities = array_filter(array($branch, $tag, $sha));
+      if (count($posibilities) > 1) {
+        return drush_set_error(dt('--branch, --tag and --sha are mutually exclusive.'));
+      }
+      elseif (count($posibilities) < 1) {
+        return drush_set_error(dt('You must provide at least one of --branch, --tag or --sha.'));
+      }
+
+      // Even if we already have a SHA, we let it through rev-parse. Easy way to
+      // check for existence and get it normalized to a full SHA.
+      if ($this->shLocal('git rev-parse ' . reset($posibilities))) {
+        $sha = trim($this->shOutput());
+      }
+      else {
+        if (!empty($sha)) {
+          return drush_set_error(dt('Unknown SHA.'));
+        }
+        else {
+          return drush_set_error(dt('Error finding SHA for ' . (!empty($branch) ? 'branch' : 'tag') . '.'));
+        }
+      }
+
+      return $sha;
     }
 
     /**
@@ -413,33 +466,15 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function validate() {
-      $branch = drush_get_option('branch', NULL);
-      $tag = drush_get_option('tag', NULL);
-      $sha = drush_get_option('sha', NULL);
-
-      $posibilities = array_filter(array($branch, $tag, $sha));
-      if (count($posibilities) > 1) {
-        return drush_set_error(dt('--branch, --tag and --sha are mutually exclusive.'));
+      $options = array(
+        'branch' => drush_get_option('branch', NULL),
+        'tag' => drush_get_option('tag', NULL),
+        'sha' => drush_get_option('sha', NULL),
+      );
+      if ($this->sha = $this->pickSha($options)) {
+        return TRUE;
       }
-      elseif (count($posibilities) < 1) {
-        return drush_set_error(dt('You must provide at least one of --branch, --tag or --sha.'));
-      }
-
-      // Even if we already have a SHA, we let it through rev-parse. Easy way to
-      // check for existence and get it normalized to a full SHA.
-      if ($this->shLocal('git rev-parse ' . reset($posibilities))) {
-        $this->sha = trim($this->shOutput());
-      }
-      else {
-        if (!empty($sha)) {
-          return drush_set_error(dt('Unknown SHA.'));
-        }
-        else {
-          return drush_set_error(dt('Error finding SHA for ' . (!empty($branch) ? 'branch' : 'tag') . '.'));
-        }
-      }
-
-      return TRUE;
+      return FALSE;
     }
 
     /**
@@ -829,6 +864,80 @@ namespace Deployotron\Actions {
         return drush_set_error(dt('Error runninng drake.'));
       }
       return TRUE;
+    }
+  }
+
+  /**
+   * Create a VERSION.txt file.
+   */
+  class CreateVersionTxt extends Action {
+    static protected $description = 'Create VERSION.txt.';
+    static protected $runMessage = 'Creating VERSION.txt';
+    static protected $short = 'create VERSION.txt';
+    static protected $killSwitch = 'no-create-version-txt';
+    static protected $versionTxt = NULL;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOptions() {
+      return parent::getOptions() + array(
+        'branch' => 'Branch to check out.',
+        'tag' => 'Tag to check out.',
+        'sha' => 'SHA to check out.',
+      );
+    }
+
+    /**
+     * Returns a formatted string containing content for
+     * a version TXT file.
+     *
+     * @return string
+     */
+    protected function generateVersionTxt() {
+      if (empty($this->versionTxt)) {
+        $options = array(
+          'branch' => drush_get_option('branch', NULL),
+          'tag' => drush_get_option('tag', NULL),
+          'sha' => drush_get_option('sha', NULL),
+        );
+        $sha = $this->pickSha($options);
+        $this->shLocal('git tag --points-at '. $sha);
+        $tags = implode(', ', $this->shOutputArray());
+        $branch = drush_get_option('branch', NULL);
+
+        $version_txt = array();
+        $version_txt[] = 'Deployment info';
+        $version_txt[] = '---------------';
+        if ($branch) {
+          $version_txt[] = 'Branch: ' . $branch;
+        }
+        if (!empty($tags)) {
+          $version_txt[] = 'Tags: ' . $tags;
+        }
+        $version_txt[] = 'SHA: ' . $sha;
+        $version_txt[] = 'Time of deployment: ' . date('r');
+        $version_txt[] = 'Deployer: ' . $_SERVER['USER'] . '@' . php_uname('n');
+
+        $this->versionTxt = implode("\n", $version_txt);
+      }
+      return $this->versionTxt;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDescription() {
+      return self::$description . ":\n" . $this->generateVersionTxt();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run() {
+      // Delete any pre-existing VERSION.txt file and create a new one.
+      $this->sh('rm VERSION.txt');
+      $this->sh('echo ' . escapeshellarg($this->generateVersionTxt()) . ' > VERSION.txt');
     }
   }
 }

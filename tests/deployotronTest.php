@@ -87,6 +87,9 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at 04256b5992d8b4a4fae25c7cb7888583749fabc0/', $this->getOutput());
 
+    // Check that VERSION.txt was created.
+    $this->assertFileExists($this->deploySite() . '/VERSION.txt');
+
     // Check that a dirty checkout makes deployment fail..
     file_put_contents($this->deploySite() . '/index.php', 'stuff');
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot(), self::EXIT_ERROR);
@@ -96,6 +99,16 @@ class DrakeCase extends Drush_CommandTestCase {
     exec('cd ' . $this->deploySite() . ' && git reset --hard');
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at b9471948c3f83a665dd4f106aba3de8962d69b42/', $this->getOutput());
+
+    // VERSION.txt should still exist.
+    $this->assertFileExists($this->deploySite() . '/VERSION.txt');
+    // Check content.
+    $version_txt = file_get_contents($this->deploySite() . '/VERSION.txt');
+    $this->assertRegExp('/Deployment info/', $version_txt);
+    $this->assertRegExp('/Branch: master/', $version_txt);
+    $this->assertRegExp('/SHA: b9471948c3f83a665dd4f106aba3de8962d69b42/', $version_txt);
+    $this->assertRegExp('/Time of deployment: /', $version_txt);
+    $this->assertRegExp('/Deployer: /', $version_txt);
 
     // @todo check that a file in the way of a new file will cause the
     //   deployment to roll back
