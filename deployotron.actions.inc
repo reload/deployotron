@@ -937,7 +937,8 @@ namespace Deployotron\Actions {
     public function run() {
       // Delete any pre-existing VERSION.txt file and create a new one.
       $this->sh('rm VERSION.txt');
-      $this->sh('echo ' . escapeshellarg($this->generateVersionTxt()) . ' > VERSION.txt');
+      $this->sh('echo -e ' . escapeshellarg(strtr($this->generateVersionTxt(), array("\n" => "\\n"))) . ' > VERSION.txt');
+      return TRUE;
     }
   }
 }
