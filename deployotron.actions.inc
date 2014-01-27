@@ -978,8 +978,7 @@ namespace Deployotron\Actions {
         );
 
         $curl_response = curl_exec($curl);
-        $flowdock_response = json_decode($curl_response);
-        if (!empty($flowdock_response)) {
+        if ($curl_response != '{}') {
           drush_log(dt('Unexpected response from FlowDock: @response', array('@response' => $curl_response)), 'warning');
         }
         curl_close($curl);
