@@ -156,11 +156,14 @@ function drush_deployotron_run($name, $site_alias) {
   }
 
   $success = FALSE;
+  // Using an ArrayObject instead of a plain array, as arrays are passed by copy
+  // and objects aren't. Relying on the callee to remember the & is error-prone.
+  $state = new ArrayObject();
   foreach ($_deployotron_actions as $action) {
     if ($action->enabled()) {
       $short = $action->getShort();
       drush_log($action->getRunMessage(), 'status');
-      $success = $action->run();
+      $success = $action->run($state);
       $_deployotron_rollbacks[] = $action;
       if (!$success) {
         drush_log(dt('@action failed.', array('@action' => $short)), 'error');

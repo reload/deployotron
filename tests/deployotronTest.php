@@ -110,6 +110,9 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->assertRegExp('/Time of deployment: /', $version_txt);
     $this->assertRegExp('/Deployer: /', $version_txt);
 
+    // Check that the switch for echo didn't got written to the file.
+    $this->assertNotRegExp('/-e/', $version_txt);
+
     // @todo check that a file in the way of a new file will cause the
     //   deployment to roll back
 
