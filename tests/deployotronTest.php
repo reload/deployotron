@@ -16,6 +16,9 @@ class DrakeCase extends Drush_CommandTestCase {
    */
   public function setUp() {
     // Deployotron needs a site to run in.
+    if (file_exists($this->webroot())) {
+      exec("rm -rf " . $this->webroot() . '/sites/*');
+    }
     $this->setUpDrupal();
 
     // For speed, cache the repo we clone.
@@ -90,10 +93,9 @@ class DrakeCase extends Drush_CommandTestCase {
   }
 
   /**
-   * Check that the basics work.
+   * Test help commands.
    */
-  public function testBasic() {
-    // Simple test to see if the deploy command is available.
+  public function testHelp() {
     // Drush 5 needs to be kicked to see the new command.
     $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
 
@@ -113,6 +115,14 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->assertRegExp('/deploy runs the actions: SanityCheck/', $this->getOutput());
     $this->assertRegExp('/DeployCode:\\nChecks out a specified/', $this->getOutput());
     $this->assertRegExp('/--branch/', $this->getOutput());
+  }
+
+  /**
+   * Check that the basics work.
+   */
+  public function testBasic() {
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
 
     // Check that deployment works.
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot());
