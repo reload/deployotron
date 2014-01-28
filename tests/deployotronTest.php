@@ -18,13 +18,22 @@ class DrakeCase extends Drush_CommandTestCase {
     // Deployotron needs a site to run in.
     $this->setUpDrupal();
 
+    // For speed, cache the repo we clone.
+    $cached_repo = $this->cachedRepo();
+    if (!file_exists($cached_repo)) {
+      exec("cd " . dirname($cached_repo) . " && git clone --bare " . DEPLOYOTRON_SITE_REPO . " " . basename($cached_repo), $output, $rc);
+      if ($rc != 0) {
+        $this->fail('Problem cloning site for deployment.');
+      }
+    }
+
     // And a 'site' to deploy to.
     $deploy_site = $this->deploySite();
     if (file_exists($deploy_site)) {
       // Start afresh.
       `rm -rf $deploy_site`;
     }
-    exec("cd " . dirname($deploy_site) . " && git clone " . DEPLOYOTRON_SITE_REPO . " $deploy_site", $output, $rc);
+    exec("cd " . dirname($deploy_site) . " && git clone " . $cached_repo . " $deploy_site", $output, $rc);
     if ($rc != 0) {
       $this->fail('Problem cloning site for deployment.');
     }
@@ -64,6 +73,13 @@ class DrakeCase extends Drush_CommandTestCase {
     // reporting.
     symlink($deployotron_dir . '/deployotron.drush.inc', $site_drush . '/deployotron/deployotron.drush.inc');
     symlink($deployotron_dir . '/deployotron.actions.inc', $site_drush . '/deployotron/deployotron.actions.inc');
+  }
+
+  /**
+   * Path to the cached repo.
+   */
+  public function cachedRepo() {
+    return $this->directory_cache('deployotron_drupal_repo');
   }
 
   /**
