@@ -148,6 +148,7 @@ class DrakeCase extends Drush_CommandTestCase {
     // Also check that aborting works.
     $this->drush('deploy 2>&1', array('@deployotron'), array('n' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot());
     $this->assertRegExp('/Aborting/', $this->getOutput());
+    $this->assertNotRegExp('/Done/', $this->getOutput());
   }
 
   /**
