@@ -173,7 +173,7 @@ class DrakeCase extends Drush_CommandTestCase {
     // Fix the the checkout and check that we can now deploy, and throw in
     // no-confirm for coverage.
     exec('cd ' . $this->deploySite() . ' && git reset --hard');
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'no-confirm' => TRUE), NULL, $this->webroot());
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'no-confirm' => TRUE, 'branch' => '', 'sha' => 'b9471948c3f83a665dd4f106aba3de8962d69b42'), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at b9471948c3f83a665dd4f106aba3de8962d69b42/', $this->getOutput());
 
     // VERSION.txt should still exist.
@@ -181,7 +181,6 @@ class DrakeCase extends Drush_CommandTestCase {
     // Check content.
     $version_txt = file_get_contents($this->deploySite() . '/VERSION.txt');
     $this->assertRegExp('/Deployment info/', $version_txt);
-    $this->assertRegExp('/Branch: master/', $version_txt);
     $this->assertRegExp('/SHA: b9471948c3f83a665dd4f106aba3de8962d69b42/', $version_txt);
     $this->assertRegExp('/Time of deployment: /', $version_txt);
     $this->assertRegExp('/Deployer: /', $version_txt);
@@ -190,9 +189,23 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->assertNotRegExp('/-e/', $version_txt);
 
     // @todo check that a file in the way of a new file will cause the
-    //   deployment to roll back
+    //   deployment to roll back. But for that we need to run an action
+    //   that can be rolled back.
+    file_put_contents($this->deploySite() . '/sites/all/modules/coffee', 'stuff');
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->assertRegExp('/Aborting/', $this->getOutput());
+    $this->assertRegExp('/Could not checkout code/', $this->getOutput());
 
-    // $this->log($this->getOutput());
+    // Check that we're still at the same version.
+    exec('cd ' . $this->deploySite() . ' && git rev-parse HEAD', $output);
+    $this->assertEquals('b9471948c3f83a665dd4f106aba3de8962d69b42', trim(implode('', $output)));
+
+    // Remove the blocker and try again.
+    unlink($this->deploySite() . '/sites/all/modules/coffee');
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $version_txt = file_get_contents($this->deploySite() . '/VERSION.txt');
+    $this->assertRegExp('/Branch: master/', $version_txt);
+    $this->assertRegExp('/SHA: fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $version_txt);
   }
 
   /**
