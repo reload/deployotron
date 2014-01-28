@@ -105,7 +105,7 @@ class DrakeCase extends Drush_CommandTestCase {
 
     // Also for the omg command.
     $this->drush('help', array('omg'), array(), NULL, $this->webroot());
-    $this->assertRegExp('/Try to restore a site from a backup/', $this->getOutput());
+    $this->assertRegExp('/Try to find a backup, and restore it to the site/', $this->getOutput());
 
     // And check that the topic command outputs something.
     $this->drush('topic', array('deployotron-actions'), array(), NULL, $this->webroot());

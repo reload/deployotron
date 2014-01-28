@@ -79,7 +79,7 @@ function deployotron_drush_help($section) {
     case 'drush:deploy':
       return dt("Deploy site to a specific environment.");
 
-    case 'drush:omg':
+    case 'drush:oh-my-god':
       return dt("Try to find a backup, and restore it to the site.");
 
   }
