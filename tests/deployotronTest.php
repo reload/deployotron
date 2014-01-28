@@ -194,4 +194,57 @@ class DrakeCase extends Drush_CommandTestCase {
 
     // $this->log($this->getOutput());
   }
+
+  /**
+   * Test configured messages.
+   */
+  public function testMessages() {
+    $this->writeAlias(array(
+        'branch' => 'master',
+        'no-updb' => TRUE,
+        'no-cc-all' => TRUE,
+        'no-offline' => TRUE,
+        'no-dump' => TRUE,
+        'message' => 'Those about to deploy, salute you',
+      ));
+
+    // Check that messages are printed.
+    $options = array(
+      'y' => TRUE,
+      'branch' => '',
+      'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0',
+    );
+    $this->drush('deploy 2>&1', array('@deployotron'), $options, NULL, $this->webroot());
+    $this->assertRegExp('/Those about to deploy, salute you/', $this->getOutput());
+
+    $this->writeAlias(array(
+        'branch' => 'master',
+        'no-updb' => TRUE,
+        'no-cc-all' => TRUE,
+        'no-offline' => TRUE,
+        'no-dump' => TRUE,
+        'confirm_message' => 'Those about to deploy, salute you',
+        'done_message' => "Are you pondering what I'm pondering?",
+      ));
+
+    // Check that confirm message is printed if aborting, but not done message.
+    $options = array(
+      'n' => TRUE,
+      'branch' => '',
+      'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0',
+    );
+    $this->drush('deploy 2>&1', array('@deployotron'), $options, NULL, $this->webroot());
+    $this->assertRegExp('/Those about to deploy, salute you/', $this->getOutput());
+    $this->assertNotRegExp("/Are you pondering what I'm pondering/", $this->getOutput());
+
+    // Check that both are printed on successfull deploy.
+    $options = array(
+      'y' => TRUE,
+      'branch' => '',
+      'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0',
+    );
+    $this->drush('deploy 2>&1', array('@deployotron'), $options, NULL, $this->webroot());
+    $this->assertRegExp('/Those about to deploy, salute you/', $this->getOutput());
+    $this->assertRegExp("/Are you pondering what I'm pondering/", $this->getOutput());
+  }
 }
