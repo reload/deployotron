@@ -115,6 +115,30 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->assertRegExp('/deploy runs the actions: SanityCheck/', $this->getOutput());
     $this->assertRegExp('/DeployCode:\\nChecks out a specified/', $this->getOutput());
     $this->assertRegExp('/--branch/', $this->getOutput());
+
+    // Use the filter arg to get full coverage of hook_drush_help().
+    $this->drush('help', array(), array('filter' => NULL, 'n' => NULL), NULL, $this->webroot());
+    $this->assertRegExp('/Deployotron: Deploys site./', $this->getOutput());
+  }
+
+  /**
+   * Test for command line argument errors.
+   */
+  public function testErrors() {
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
+
+    // No alias error message.
+    $this->drush('deploy 2>&1', array(), array('y' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->assertRegExp('/No alias given/', $this->getOutput());
+
+    // Bad alias error.
+    $this->drush('deploy 2>&1', array('@badalias'), array('y' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->assertRegExp('/Invalid alias/', $this->getOutput());
+
+    // Also check that aborting works.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('n' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot());
+    $this->assertRegExp('/Aborting/', $this->getOutput());
   }
 
   /**
@@ -136,9 +160,10 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot(), self::EXIT_ERROR);
     $this->assertRegExp('/Repository not clean/', $this->getOutput());
 
-    // Fix the the checkout and check that we can now deploy.
+    // Fix the the checkout and check that we can now deploy, and throw in
+    // no-confirm for coverage.
     exec('cd ' . $this->deploySite() . ' && git reset --hard');
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'no-confirm' => TRUE), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at b9471948c3f83a665dd4f106aba3de8962d69b42/', $this->getOutput());
 
     // VERSION.txt should still exist.
