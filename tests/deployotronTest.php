@@ -54,20 +54,14 @@ class DrakeCase extends Drush_CommandTestCase {
       `rm -rf $site_drush`;
     }
     mkdir($site_drush, 0777, TRUE);
-    $alias_content = "<?php
-\$aliases['deployotron'] = array(
-  'uri' => 'default',
-  'root' => '" . $this->deploySite() . "',
-  'deployotron' => array(
-    'branch' => 'master',
-    'no-updb' => TRUE,
-    'no-cc-all' => TRUE,
-    'no-offline' => TRUE,
-    'no-dump' => TRUE,
-  ),
-);
-";
-    file_put_contents($site_drush . '/deployotron.aliases.drushrc.php', $alias_content);
+
+    $this->writeAlias(array(
+        'branch' => 'master',
+        'no-updb' => TRUE,
+        'no-cc-all' => TRUE,
+        'no-offline' => TRUE,
+        'no-dump' => TRUE,
+      ));
 
     // Finally, we need to install the deployotron drush command.
     mkdir($site_drush . '/deployotron', 0777, TRUE);
@@ -76,6 +70,21 @@ class DrakeCase extends Drush_CommandTestCase {
     // reporting.
     symlink($deployotron_dir . '/deployotron.drush.inc', $site_drush . '/deployotron/deployotron.drush.inc');
     symlink($deployotron_dir . '/deployotron.actions.inc', $site_drush . '/deployotron/deployotron.actions.inc');
+  }
+
+  /**
+   * Create the deployotron alias with the given options.
+   */
+  public function writeAlias($deploy_options) {
+    $aliases = array(
+      'uri' => 'default',
+      'root' => $this->deploySite(),
+      'deployotron' => $deploy_options,
+    );
+    $alias_content = "<?php
+\$aliases['deployotron'] = " . var_export($aliases, TRUE) . ';';
+    $site_drush = $this->webroot() . '/sites/all/drush';
+    file_put_contents($site_drush . '/deployotron.aliases.drushrc.php', $alias_content);
   }
 
   /**
