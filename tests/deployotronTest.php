@@ -80,8 +80,23 @@ class DrakeCase extends Drush_CommandTestCase {
     // Simple test to see if the deploy command is available.
     // Drush 5 needs to be kicked to see the new command.
     $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
+
+    // Check that the help is available.
     $this->drush('help', array('deploy'), array(), NULL, $this->webroot());
     $this->assertRegExp('/Deploy site to a specific environment/', $this->getOutput());
+
+    // Also for the omg command.
+    $this->drush('help', array('omg'), array(), NULL, $this->webroot());
+    $this->assertRegExp('/Try to restore a site from a backup/', $this->getOutput());
+
+    // And check that the topic command outputs something.
+    $this->drush('topic', array('deployotron-actions'), array(), NULL, $this->webroot());
+    // Check some random strings.
+    $this->assertRegExp('/Commands\\n--------/', $this->getOutput());
+    $this->assertRegExp('/Actions\\n-------/', $this->getOutput());
+    $this->assertRegExp('/deploy runs the actions: SanityCheck/', $this->getOutput());
+    $this->assertRegExp('/DeployCode:\\nChecks out a specified/', $this->getOutput());
+    $this->assertRegExp('/--branch/', $this->getOutput());
 
     // Check that deployment works.
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot());
