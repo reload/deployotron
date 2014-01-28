@@ -19,7 +19,7 @@ class DrakeCase extends Drush_CommandTestCase {
     if (file_exists($this->webroot())) {
       exec("rm -rf " . $this->webroot() . '/sites/*');
     }
-    $this->setUpDrupal();
+    $this->setUpDrupal(1, TRUE);
 
     // For speed, cache the repo we clone.
     $cached_repo = $this->cachedRepo();
@@ -49,6 +49,11 @@ class DrakeCase extends Drush_CommandTestCase {
 
     // We'll need to bind them together with an alias file in the 'local' site.
     $site_drush = $this->webroot() . '/sites/all/drush';
+
+    // Leech on the settings file of the site Drush installed. We need one for
+    // the DB setup for the deployment site, and we're not using the 'local'
+    // one.
+    copy($this->webroot() . '/sites/dev/settings.php', $deploy_site . '/sites/default/settings.php');
     if (file_exists($site_drush)) {
       // Start afresh.
       `rm -rf $site_drush`;
@@ -57,10 +62,6 @@ class DrakeCase extends Drush_CommandTestCase {
 
     $this->writeAlias(array(
         'branch' => 'master',
-        'no-updb' => TRUE,
-        'no-cc-all' => TRUE,
-        'no-offline' => TRUE,
-        'no-dump' => TRUE,
       ));
 
     // Finally, we need to install the deployotron drush command.
@@ -188,13 +189,16 @@ class DrakeCase extends Drush_CommandTestCase {
     // Check that the switch for echo didn't got written to the file.
     $this->assertNotRegExp('/-e/', $version_txt);
 
-    // @todo check that a file in the way of a new file will cause the
-    //   deployment to roll back. But for that we need to run an action
-    //   that can be rolled back.
+    // Check that a file in the way of a new file will cause the deployment to
+    // roll back.
     file_put_contents($this->deploySite() . '/sites/all/modules/coffee', 'stuff');
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot(), self::EXIT_ERROR);
     $this->assertRegExp('/Aborting/', $this->getOutput());
     $this->assertRegExp('/Could not checkout code/', $this->getOutput());
+
+    // Check that we rolled back.
+    $this->assertRegExp('/Rolled back set site offline/', $this->getOutput());
+    $this->log($this->getOutput());
 
     // Check that we're still at the same version.
     exec('cd ' . $this->deploySite() . ' && git rev-parse HEAD', $output);
@@ -212,6 +216,8 @@ class DrakeCase extends Drush_CommandTestCase {
    * Test configured messages.
    */
   public function testMessages() {
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
     $this->writeAlias(array(
         'branch' => 'master',
         'no-updb' => TRUE,
