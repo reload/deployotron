@@ -556,7 +556,7 @@ namespace Deployotron\Actions {
     public function rollback() {
       // Use the online action as rollback.
       $online = new SiteOnline($this->site);
-      $online->run();
+      $online->run(array());
     }
   }
 
@@ -585,7 +585,7 @@ namespace Deployotron\Actions {
     public function rollback() {
       // Use the online action as rollback.
       $online = new SiteOffline($this->site);
-      $online->run();
+      $online->run(array());
     }
   }
 
