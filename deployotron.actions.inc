@@ -354,7 +354,7 @@ namespace Deployotron {
 
       $posibilities = array_filter(array($branch, $tag, $sha));
       if (count($posibilities) > 1) {
-        return drush_set_error(dt('--branch, --tag and --sha are mutually exclusive.'));
+        drush_log(dt('More than one of branch/tag/sha specified, using @selected.', array('@selected' => !empty($sha) ? 'sha' : 'tag')), 'warning');
       }
       elseif (count($posibilities) < 1) {
         return drush_set_error(dt('You must provide at least one of --branch, --tag or --sha.'));
@@ -362,7 +362,7 @@ namespace Deployotron {
 
       // Even if we already have a SHA, we let it through rev-parse. Easy way to
       // check for existence and get it normalized to a full SHA.
-      if ($this->shLocal('git rev-parse ' . reset($posibilities))) {
+      if ($this->shLocal('git rev-parse ' . end($posibilities))) {
         $sha = trim($this->shOutput());
       }
       else {

@@ -160,7 +160,10 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
 
     // Check that deployment works.
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot());
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot());
+    // Also check that we get a notice for for having both branch (on alias) and
+    // sha (command line) specified.
+    $this->assertRegExp('/More than one of branch\\/tag\\/sha specified, using sha./', $this->getOutput());
     $this->assertRegExp('/HEAD now at 04256b5992d8b4a4fae25c7cb7888583749fabc0/', $this->getOutput());
 
     // Check that VERSION.txt was created.
