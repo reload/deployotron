@@ -928,9 +928,9 @@ namespace Deployotron\Actions {
    * Send a notification to FlowDock.
    */
   class FlowDockNotificaton extends Action {
-    static protected $description = 'Notify on FlowDock.';
-    static protected $runMessage = 'Notifying on FlowDock.';
-    static protected $short = 'notify on FlowDock';
+    static protected $description = 'Send FlowDock notification.';
+    static protected $runMessage = 'Sending FlowDock notification.';
+    static protected $short = 'send FlowDock notification';
     static protected $enableSwitch = 'flowdock-token';
 
     /**
@@ -984,7 +984,7 @@ namespace Deployotron\Actions {
         curl_close($curl);
       }
       else {
-        drush_log(dt('No version deployed, not notifying FlowDock.'), 'warning');
+        drush_log(dt('No version deployed, not sending FlowDock notification.'), 'warning');
       }
       return TRUE;
     }
