@@ -286,4 +286,39 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->assertRegExp('/Those about to deploy, salute you/', $this->getOutput());
     $this->assertRegExp("/Are you pondering what I'm pondering/", $this->getOutput());
   }
+
+  /**
+   * Test the omg command.
+   */
+  public function testOmg() {
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
+
+    // Start with a simple deployment.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0'), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at 04256b5992d8b4a4fae25c7cb7888583749fabc0/', $this->getOutput());
+
+    // Set a variable.
+    $this->drush('vset', array('magic_variable', 'bumblebee'), array(), '@deployotron', $this->webroot());
+    // Check that we can see the value.
+    $this->drush('vget', array('magic_variable'), array(), '@deployotron', $this->webroot());
+    $this->assertEquals("magic_variable: 'bumblebee'", $this->getOutput());
+
+    // Deploy another version.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => 'b9471948c3f83a665dd4f106aba3de8962d69b42'), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at b9471948c3f83a665dd4f106aba3de8962d69b42/', $this->getOutput());
+
+    // And a third time.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Now check the rollback.
+    $this->drush('omg 2>&1', array('@deployotron'), array('y' => TRUE, 'choice' => 3), NULL, $this->webroot());
+    $this->log($this->getOutput());
+    $this->assertRegExp('/HEAD now at 7a9166ac76bb63f45a5a8a6b9a4e3a58eb04da6e/', $this->getOutput());
+
+    // Check that the variable has disappeared.
+    $this->drush('vget', array('magic_variable'), array(), '@deployotron', $this->webroot(), self::EXIT_ERROR);
+    $this->assertNotEquals("magic_variable: 'bumblebee'", $this->getOutput());
+  }
 }
