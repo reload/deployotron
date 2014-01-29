@@ -302,7 +302,7 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->drush('vset', array('magic_variable', 'bumblebee'), array(), '@deployotron', $this->webroot());
     // Check that we can see the value.
     $this->drush('vget', array('magic_variable'), array(), '@deployotron', $this->webroot());
-    $this->assertEquals("magic_variable: 'bumblebee'", $this->getOutput());
+    $this->assertRegExp("/magic_variable: .bumblebee./", $this->getOutput());
 
     // Deploy another version.
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => 'b9471948c3f83a665dd4f106aba3de8962d69b42'), NULL, $this->webroot());
@@ -319,6 +319,6 @@ class DrakeCase extends Drush_CommandTestCase {
 
     // Check that the variable has disappeared.
     $this->drush('vget', array('magic_variable'), array(), '@deployotron', $this->webroot(), self::EXIT_ERROR);
-    $this->assertNotEquals("magic_variable: 'bumblebee'", $this->getOutput());
+    $this->assertNotRegExp("/magic_variable: .bumblebee./", $this->getOutput());
   }
 }
