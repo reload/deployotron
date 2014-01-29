@@ -9,6 +9,8 @@ up the files to having Capistrano deploy the site when the build
 passes in Jenkins. Deployotron aims to be simple to use, but also
 usable as a part of a bigger setup.
 
+[![Build Status](https://travis-ci.org/reload/deployotron.png?branch=master)](https://travis-ci.org/reload/deployotron)
+
 Overview
 ========
 
@@ -25,8 +27,6 @@ For everyone's sanity, we suggest having a Drush alias file in
 sites/all/drush/<short-site-alias>.aliases.drushrc.php that defines
 relevant environments (production, dev, etc.), so that everybody is
 using the same settings.
-
-[![Build Status](https://travis-ci.org/reload/deployotron.png?branch=master)](https://travis-ci.org/reload/deployotron)
 
 Setup
 =====
