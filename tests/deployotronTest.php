@@ -209,6 +209,7 @@ class DrakeCase extends Drush_CommandTestCase {
     // Remove the blocker and try again.
     unlink($this->deploySite() . '/sites/all/modules/coffee');
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
     $version_txt = file_get_contents($this->deploySite() . '/VERSION.txt');
     $this->assertRegExp('/Branch: master/', $version_txt);
     $this->assertRegExp('/SHA: fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $version_txt);
