@@ -198,7 +198,6 @@ class DrakeCase extends Drush_CommandTestCase {
 
     // Check that we rolled back.
     $this->assertRegExp('/Rolled back set site offline/', $this->getOutput());
-    $this->log($this->getOutput());
 
     // Check that we're still at the same version.
     exec('cd ' . $this->deploySite() . ' && git rev-parse HEAD', $output);
