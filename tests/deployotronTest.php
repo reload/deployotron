@@ -177,7 +177,7 @@ class DrakeCase extends Drush_CommandTestCase {
     // Fix the the checkout and check that we can now deploy, and throw in
     // no-confirm for coverage.
     exec('cd ' . $this->deploySite() . ' && git reset --hard');
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'no-confirm' => TRUE, 'branch' => '', 'sha' => 'b9471948c3f83a665dd4f106aba3de8962d69b42'), NULL, $this->webroot());
+    $this->drush('deploy 2>&1', array('@deployotron'), array('no-confirm' => TRUE, 'branch' => '', 'sha' => 'b9471948c3f83a665dd4f106aba3de8962d69b42'), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at b9471948c3f83a665dd4f106aba3de8962d69b42/', $this->getOutput());
 
     // VERSION.txt should still exist.
