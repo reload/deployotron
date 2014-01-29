@@ -60,6 +60,13 @@ class DrakeCase extends Drush_CommandTestCase {
     }
     mkdir($site_drush, 0777, TRUE);
 
+    // Create or clear the dump dir.
+    $dump_dir = $this->dumpPath();
+    if (file_exists($dump_dir)) {
+      `rm -rf $dump_dir`;
+    }
+    mkdir($dump_dir);
+
     $this->writeAlias(array(
         'branch' => 'master',
       ));
@@ -77,6 +84,9 @@ class DrakeCase extends Drush_CommandTestCase {
    * Create the deployotron alias with the given options.
    */
   public function writeAlias($deploy_options) {
+    $deploy_options += array(
+      'dump-dir' => $this->dumpPath(),
+    );
     $aliases = array(
       'uri' => 'default',
       'root' => $this->deploySite(),
@@ -100,6 +110,13 @@ class DrakeCase extends Drush_CommandTestCase {
    */
   public function deploySite() {
     return UNISH_SANDBOX . '/deployotron';
+  }
+
+  /**
+   * Path to where we put the dumps.
+   */
+  public function dumpPath() {
+    return UNISH_SANDBOX . '/deployotron_dumps';
   }
 
   /**
