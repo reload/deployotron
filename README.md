@@ -10,6 +10,7 @@ passes in Jenkins. Deployotron aims to be simple to use, but also
 usable as a part of a bigger setup.
 
 [![Build Status](https://travis-ci.org/reload/deployotron.png?branch=master)](https://travis-ci.org/reload/deployotron)
+[![Coverage Status](https://coveralls.io/repos/reload/deployotron/badge.png?branch=master)](https://coveralls.io/r/reload/deployotron?branch=master)
 
 Overview
 ========

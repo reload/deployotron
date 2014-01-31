@@ -1,0 +1,20 @@
+<!-- Copy and rename to phpunit.xml. Customize as needed. -->
+<phpunit backupGlobals="false"
+    backupStaticAttributes="false"
+    >
+  <testsuites>
+    <testsuite name="Deployotron Test Suite">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+
+  <filter>
+    <whitelist addUncoveredFilesFromWhitelist="true">
+      <directory suffix='.php'>.</directory>
+      <directory suffix='.inc'>.</directory>
+      <exclude>
+        <directory suffix=".php">tests</directory>
+      </exclude>
+    </whitelist>
+  </filter>
+</phpunit>
