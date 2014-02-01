@@ -11,6 +11,11 @@ define('DEPLOYOTRON_SITE_REPO', 'https://github.com/reload/deployotron_testsite.
  * Deployotron testing class.
  */
 class DrakeCase extends Drush_CommandTestCase {
+
+  /**
+   * Token for a testing Flowdock flow.
+   */
+  protected $flowdockToken = 'cf5e1bd1f986989265fdcc5f92af31dd';
   /**
    * Setup before each test case.
    */
@@ -337,5 +342,29 @@ class DrakeCase extends Drush_CommandTestCase {
     // Check that the variable has disappeared.
     $this->drush('vget', array('magic_variable'), array(), '@deployotron', $this->webroot(), self::EXIT_ERROR);
     $this->assertNotRegExp("/magic_variable: .bumblebee./", $this->getOutput());
+  }
+
+  /**
+   * Test Flowdock integration.
+   *
+   * No attempt at verifying that the message was shown is done, but we assume
+   * that Flowdock validates the message and returns something other than
+   * success if it finds anything wrong with it, which should cause Deployotron
+   * to print an error.
+   */
+  public function testFlowdock() {
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
+
+    // Check that deployment works.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'flowdock-token' => $this->flowdockToken), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Check that we attempted to notify Flowdock.
+    $this->assertRegExp('/Sending FlowDock notification/', $this->getOutput());
+    // Check for error message.
+    $this->assertNotRegExp('/Unexpected response from FlowDock/', $this->getOutput());
+    // Test for generic error messages.
+    $this->assertNotRegExp('/\[error\]/', $this->getOutput());
   }
 }
