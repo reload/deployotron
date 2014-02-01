@@ -434,6 +434,7 @@ namespace Deployotron\Actions {
    */
   class DeployCode extends Action {
     static protected $runMessage = 'Deploying';
+    static protected $killSwitch = 'no-deploy';
     static protected $short = 'deploy code';
     static protected $help = 'Checks out a specified branch/tag/sha on the site.';
 

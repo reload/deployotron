@@ -397,4 +397,28 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'restart-varnish-command' => '/bin/false'), NULL, $this->webroot(), self::EXIT_ERROR);
     $this->assertRegExp('/Error restarting varnish/', $this->getOutput());
   }
+
+  /**
+   * Test no-deploy.
+   *
+   * And that Flowdock and VERSION.txt prints the appropriate message.
+   */
+  public function testNoDeploy() {
+    $this->writeAlias(array(
+        'branch' => 'master',
+      ));
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
+
+    // Check that deployment works.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'no-deploy' => TRUE, 'flowdock-token' => $this->flowdockToken), NULL, $this->webroot());
+    // Check VERSION.txt message.
+    $this->assertRegExp('/No version deployed, not creating\/updating VERSION.txt/', $this->getOutput());
+
+    // Check Flowdock message.
+    $this->assertRegExp('/No version deployed, not sending Flowdock notification/', $this->getOutput());
+  }
 }
