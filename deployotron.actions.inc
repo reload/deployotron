@@ -695,20 +695,6 @@ namespace Deployotron\Actions {
 
       return TRUE;
     }
-
-    /**
-     * Figure out dump filename.
-     */
-    protected function dumpFilename() {
-      // Because there can pass time between this is called first and last
-      // (--confirm primarily).
-      static $date;
-      if (!$date) {
-        $date = date('Y-m-d\TH:i:s');
-      }
-
-      return sprintf("%s/deploy.%s.%s.sql", drush_get_option('dump-dir', '/tmp'), $date, $this->getHead());
-    }
   }
 
   /**
