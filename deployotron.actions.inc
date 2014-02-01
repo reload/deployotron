@@ -710,9 +710,18 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
+    public function getOptions() {
+      return parent::getOptions() + array(
+        'restart-apache2-command' => 'Override command used to restart Apache2.',
+      );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function run($state) {
-      if (!$this->sh('sudo service apache2 restart')) {
-        return drush_set_error(dt('Error restarting apache2.'), 'error');
+      if (!$this->sh(drush_get_option('restart-apache2-command', 'sudo service apache2 restart'))) {
+        return drush_set_error(dt('Error restarting apache2.'));
       }
       return TRUE;
     }
@@ -731,9 +740,18 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
+    public function getOptions() {
+      return parent::getOptions() + array(
+        'restart-varnish-command' => 'Override command used to restart Varnish.',
+      );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function run($state) {
-      if (!$this->sh('sudo service varnish restart')) {
-        return drush_set_error(dt('Error restarting varnish.'), 'error');
+      if (!$this->sh(drush_get_option('restart-varnish-command', 'sudo service varnish restart'))) {
+        return drush_set_error(dt('Error restarting varnish.'));
       }
       return TRUE;
     }
