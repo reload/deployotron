@@ -19,7 +19,7 @@ namespace Deployotron {
         'ClearCache',
         'SiteOnline',
         'RestartVarnish',
-        'FlowDockNotificaton',
+        'FlowdockNotificaton',
       ),
       'omg' => array(
         'OMGPrepare',
@@ -911,12 +911,12 @@ namespace Deployotron\Actions {
   }
 
   /**
-   * Send a notification to FlowDock.
+   * Send a notification to Flowdock.
    */
-  class FlowDockNotificaton extends Action {
-    static protected $description = 'Send FlowDock notification.';
-    static protected $runMessage = 'Sending FlowDock notification.';
-    static protected $short = 'send FlowDock notification';
+  class FlowdockNotificaton extends Action {
+    static protected $description = 'Send Flowdock notification.';
+    static protected $runMessage = 'Sending Flowdock notification.';
+    static protected $short = 'send Flowdock notification';
     static protected $enableSwitch = 'flowdock-token';
 
     /**
@@ -924,7 +924,7 @@ namespace Deployotron\Actions {
      */
     public function getOptions() {
       return parent::getOptions() + array(
-        'flowdock-token' => 'FlowDock token.',
+        'flowdock-token' => 'Flowdock token.',
       );
     }
 
@@ -944,7 +944,7 @@ namespace Deployotron\Actions {
           (!empty($tags) ? '<br />Tags: ' . $tags : '');
 
         $data = array(
-          'source' => 'Deployontron',
+          'source' => 'Deployotron',
           'from_address' => 'deployotron@reload.dk',
           'subject' => $subject,
           'content' => $body,
@@ -965,12 +965,12 @@ namespace Deployotron\Actions {
 
         $curl_response = curl_exec($curl);
         if ($curl_response != '{}') {
-          drush_log(dt('Unexpected response from FlowDock: @response', array('@response' => $curl_response)), 'warning');
+          drush_log(dt('Unexpected response from Flowdock: @response', array('@response' => $curl_response)), 'warning');
         }
         curl_close($curl);
       }
       else {
-        drush_log(dt('No version deployed, not sending FlowDock notification.'), 'warning');
+        drush_log(dt('No version deployed, not sending Flowdock notification.'), 'warning');
       }
       return TRUE;
     }
