@@ -186,10 +186,27 @@ class DrakeCase extends Drush_CommandTestCase {
     // Check that VERSION.txt was created.
     $this->assertFileExists($this->deploySite() . '/VERSION.txt');
 
+    // Check that a invalid tag/branch prints the proper error message.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'tag' => 'slipstream', 'sha' => ''), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->assertRegExp('/Error finding SHA for tag/', $this->getOutput());
+
+    // Check that a invalid SHA prints the proper error message.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'tag' => '', 'sha' => 'deadc0de'), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->assertRegExp('/Unknown SHA/', $this->getOutput());
+
+    // Check that missing branch/tag/sha prints the proper error message.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'tag' => '', 'sha' => ''), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->assertRegExp('/You must provide at least one of --branch, --tag or --sha/', $this->getOutput());
+
     // Check that a dirty checkout makes deployment fail..
     file_put_contents($this->deploySite() . '/index.php', 'stuff');
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot(), self::EXIT_ERROR);
     $this->assertRegExp('/Repository not clean/', $this->getOutput());
+
+    // Check that a dirty checkout makes deployment fail, even if added to git.
+    exec('cd ' . $this->deploySite() . ' && git add -u');
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->assertRegExp('/Uncommitted changes in the index/', $this->getOutput());
 
     // Fix the the checkout and check that we can now deploy, and throw in
     // no-confirm for coverage.
