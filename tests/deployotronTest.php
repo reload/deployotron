@@ -361,9 +361,9 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
 
     // Check that we attempted to notify Flowdock.
-    $this->assertRegExp('/Sending FlowDock notification/', $this->getOutput());
+    $this->assertRegExp('/Sending Flowdock notification/', $this->getOutput());
     // Check for error message.
-    $this->assertNotRegExp('/Unexpected response from FlowDock/', $this->getOutput());
+    $this->assertNotRegExp('/Unexpected response from Flowdock/', $this->getOutput());
     // Test for generic error messages.
     $this->assertNotRegExp('/\[error\]/', $this->getOutput());
   }
