@@ -10,7 +10,7 @@ define('DEPLOYOTRON_SITE_REPO', 'https://github.com/reload/deployotron_testsite.
 /**
  * Deployotron testing class.
  */
-class DrakeCase extends Drush_CommandTestCase {
+class DeployotronCase extends Drush_CommandTestCase {
 
   /**
    * Token for a testing Flowdock flow.
