@@ -356,7 +356,7 @@ class DrakeCase extends Drush_CommandTestCase {
     // Drush 5 needs to be kicked to see the new command.
     $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
 
-    // Check that deployment works.
+    // Run a deployment with Flowdock notification.
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'flowdock-token' => $this->flowdockToken), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
 
@@ -364,6 +364,19 @@ class DrakeCase extends Drush_CommandTestCase {
     $this->assertRegExp('/Sending Flowdock notification/', $this->getOutput());
     // Check for error message.
     $this->assertNotRegExp('/Unexpected response from Flowdock/', $this->getOutput());
+
+    // Test for generic error messages.
+    $this->assertNotRegExp('/\[error\]/', $this->getOutput());
+
+    // Try again with an invalid token.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'flowdock-token' => 'badc0de'), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Check that we attempted to notify Flowdock.
+    $this->assertRegExp('/Sending Flowdock notification/', $this->getOutput());
+    // Check for error message.
+    $this->assertRegExp('/Unexpected response from Flowdock/', $this->getOutput());
+
     // Test for generic error messages.
     $this->assertNotRegExp('/\[error\]/', $this->getOutput());
   }
