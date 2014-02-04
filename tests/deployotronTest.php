@@ -336,7 +336,6 @@ class DeployotronCase extends Drush_CommandTestCase {
 
     // Now check the rollback.
     $this->drush('omg 2>&1', array('@deployotron'), array('y' => TRUE, 'choice' => 3), NULL, $this->webroot());
-    $this->log($this->getOutput());
     $this->assertRegExp('/HEAD now at 7a9166ac76bb63f45a5a8a6b9a4e3a58eb04da6e/', $this->getOutput());
 
     // Check that the variable has disappeared.
