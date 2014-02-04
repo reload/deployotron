@@ -65,10 +65,7 @@ namespace Deployotron {
         drush_print();
 
         // Print options.
-        // @todo Shouldn't really be necessary to instantiate the class to get
-        //   the options.
-        $action = new $class_name('@none');
-        $options = $action->getOptions();
+        $options = $class_name::getOptions();
         if ($options) {
           $table = array(array('Options:'));
           foreach ($options as $name => $desc) {
@@ -98,6 +95,11 @@ namespace Deployotron {
     static protected $runMessage = "Running action.";
 
     /**
+     * Options for this action.
+     */
+    static protected $options = array();
+
+    /**
      * The site this action works on.
      */
     protected $site;
@@ -120,6 +122,27 @@ namespace Deployotron {
         return static::$description;
       }
       return "No description.";
+    }
+
+    /**
+     * Get the command line options for this action.
+     *
+     * @return array
+     *   Options as defined on commands in hook_drush_command().
+     */
+    public static function getOptions() {
+      $options = array();
+      if (isset(static::$killSwitch)) {
+        $options += array(
+          static::$killSwitch => "Don't " . static::$short . (isset(static::$enableSwitch) ? ' (overrides --' . static::$enableSwitch . ')' : '') . '.',
+        );
+      }
+      if (isset(static::$enableSwitch)) {
+        $options += array(
+          static::$enableSwitch => ucfirst(static::$short) . '.',
+        );
+      }
+      return $options + static::$options;
     }
 
     /**
@@ -178,27 +201,6 @@ namespace Deployotron {
         return static::$description;
       }
       return dt("Run the @short action.", array('@short' => static::$short));
-    }
-
-    /**
-     * Get the command line options for this action.
-     *
-     * @return array
-     *   Options as defined on commands in hook_drush_command().
-     */
-    public function getOptions() {
-      $options = array();
-      if (isset(static::$killSwitch)) {
-        $options += array(
-          static::$killSwitch => "Don't " . static::$short . (isset(static::$enableSwitch) ? ' (overrides --' . static::$enableSwitch . ')' : '') . '.',
-        );
-      }
-      if (isset(static::$enableSwitch)) {
-        $options += array(
-          static::$enableSwitch => ucfirst(static::$short) . '.',
-        );
-      }
-      return $options;
     }
 
     /**
@@ -440,6 +442,11 @@ namespace Deployotron\Actions {
     static protected $killSwitch = 'no-deploy';
     static protected $short = 'deploy code';
     static protected $help = 'Checks out a specified branch/tag/sha on the site.';
+    static protected $options = array(
+      'branch' => 'Branch to check out.',
+      'tag' => 'Tag to check out.',
+      'sha' => 'SHA to check out.',
+    );
 
     /**
      * {@inheritdoc}
@@ -455,17 +462,6 @@ namespace Deployotron\Actions {
       }
 
       return dt("Run git fetch and check out @sha:\n!info", array('@sha' => $this->sha, '!info' => $commit . "\n\nAll changes:\n" . implode("\n", $stat)));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions() {
-      return parent::getOptions() + array(
-        'branch' => 'Branch to check out.',
-        'tag' => 'Tag to check out.',
-        'sha' => 'SHA to check out.',
-      );
     }
 
     /**
@@ -601,15 +597,9 @@ namespace Deployotron\Actions {
     static protected $killSwitch = 'no-dump';
     static protected $short = 'dump database';
     static protected $help = 'Makes a SQL dump of the site database.';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions() {
-      return parent::getOptions() + array(
-        'dump-dir' => 'Directory for database dumps.',
-      );
-    }
+    static protected $options = array(
+      'dump-dir' => 'Directory for database dumps.',
+    );
 
     /**
      * {@inheritdoc}
@@ -650,15 +640,9 @@ namespace Deployotron\Actions {
   class RestoreDatabase extends Action {
     static protected $runMessage = 'Restoring database';
     static protected $short = 'restore database';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions() {
-      return parent::getOptions() + array(
-        'file' => 'Database dump file to restore.',
-      );
-    }
+    static protected $options = array(
+      'file' => 'Database dump file to restore.',
+    );
 
     /**
      * {@inheritdoc}
@@ -710,15 +694,9 @@ namespace Deployotron\Actions {
     static protected $enableSwitch = 'restart-apache2';
     static protected $killSwitch = 'no-restart-apache2';
     static protected $short = 'restart apache2';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions() {
-      return parent::getOptions() + array(
-        'restart-apache2-command' => 'Override command used to restart Apache2.',
-      );
-    }
+    static protected $options = array(
+      'restart-apache2-command' => 'Override command used to restart Apache2.',
+    );
 
     /**
      * {@inheritdoc}
@@ -740,15 +718,9 @@ namespace Deployotron\Actions {
     static protected $enableSwitch = 'restart-varnish';
     static protected $killSwitch = 'no-restart-varnish';
     static protected $short = 'restart varnish';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions() {
-      return parent::getOptions() + array(
-        'restart-varnish-command' => 'Override command used to restart Varnish.',
-      );
-    }
+    static protected $options = array(
+      'restart-varnish-command' => 'Override command used to restart Varnish.',
+    );
 
     /**
      * {@inheritdoc}
@@ -809,15 +781,9 @@ namespace Deployotron\Actions {
     static protected $runMessage = 'Preparing';
     static protected $short = 'preparing';
     static protected $help = 'Prepares restoring by looking for dumps to import.';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions() {
-      return parent::getOptions() + array(
-        'dump-dir' => 'Directory for database dumps.',
-      );
-    }
+    static protected $options = array(
+      'dump-dir' => 'Directory for database dumps.',
+    );
 
     /**
      * {@inheritdoc}
@@ -940,15 +906,9 @@ namespace Deployotron\Actions {
     static protected $runMessage = 'Sending Flowdock notification.';
     static protected $short = 'send Flowdock notification';
     static protected $enableSwitch = 'flowdock-token';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions() {
-      return parent::getOptions() + array(
-        'flowdock-token' => 'Flowdock token.',
-      );
-    }
+    static protected $options = array(
+      'flowdock-token' => 'Flowdock token.',
+    );
 
     /**
      * {@inheritdoc}
