@@ -90,7 +90,7 @@ namespace Deployotron {
     /**
      * Set a default short description.
      */
-    static protected $short = "Incompletly implemented action.";
+    static protected $short = "incompletely implemented";
 
     static protected $runMessage = "Running action.";
 
