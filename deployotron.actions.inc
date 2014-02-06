@@ -20,6 +20,7 @@ namespace Deployotron {
         'SiteOnline',
         'RestartVarnish',
         'FlowdockNotificaton',
+        'NewRelicNotificaton',
       ),
       'omg' => array(
         'OMGPrepare',
@@ -942,7 +943,8 @@ namespace Deployotron\Actions {
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
-            'Content-Length: ' . strlen($data))
+            'Content-Length: ' . strlen($data),
+          )
         );
 
         $curl_response = curl_exec($curl);
@@ -953,6 +955,90 @@ namespace Deployotron\Actions {
       }
       else {
         drush_log(dt('No version deployed, not sending Flowdock notification.'), 'warning');
+      }
+      return TRUE;
+    }
+  }
+
+  /**
+   * Send a notification to New Relic.
+   */
+  class NewRelicNotificaton extends Action {
+    static protected $description = 'Send New Relic notification.';
+    static protected $runMessage = 'Sending New Relic notification.';
+    static protected $short = 'send new relic notification';
+    static protected $enableSwitch = 'newrelic-api-key';
+    static protected $options = array(
+      'newrelic-app-name' => 'New Relic application name.',
+      'newrelic-app-id' => 'New Relic application id.',
+      'newrelic-api-key' => 'New Relic API key.',
+    );
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validate() {
+      if (!drush_get_option('newrelic-app-name', NULL) && !drush_get_option('newrelic-app-id', NULL)) {
+        return drush_set_error('Need at least one of --newrelic-app-name or --newrelic-app-id');
+      }
+      // The api-key must have been specified as its the enable switch.
+      return TRUE;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run($state) {
+      if (!empty($state['deployed_sha'])) {
+        $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
+        $tags = implode(', ', $this->shOutputArray());
+
+        $body = 'SHA: ' . $state['deployed_sha'] .
+          (!empty($state['requested_branch']) ? "\nBranch: " . $state['requested_branch'] : '') .
+          (!empty($tags) ? "\nTags: " . $tags : '');
+
+        $deployment = array(
+          'description' => $body,
+          'revision' => $state['deployed_sha'],
+          // @todo 'changelog' => '',
+          'user' => $_SERVER['USER'] . '@' . php_uname('n'),
+        );
+
+        $app_name = drush_get_option('newrelic-app-name', NULL);
+        if ($app_name) {
+          $deployment['app_name'] = $app_name;
+        }
+
+        $app_id = drush_get_option('newrelic-app-id', NULL);
+        if ($app_id) {
+          $deployment['application_id'] = $app_id;
+        }
+
+        $data = http_build_query(array('deployment' => $deployment));
+        $service_url = 'https://api.newrelic.com/deployments.xml';
+
+        $curl = curl_init($service_url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($curl, CURLOPT_POST, TRUE);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/x-www-form-urlencoded',
+            'Content-Length: ' . strlen($data),
+            'x-api-key: ' . drush_get_option('newrelic-api-key'),
+          )
+        );
+
+        $curl_response = curl_exec($curl);
+        if ($curl_response === FALSE) {
+          drush_log(dt('Curl failed: !response', array('!response' => curl_error($curl))), 'error');
+        }
+        elseif (!$curl_response) {
+          drush_log(dt('New Relic notification failed for some reason.'), 'error');
+        }
+        curl_close($curl);
+      }
+      else {
+        drush_log(dt('No version deployed, not sending New Relic notification.'), 'warning');
       }
       return TRUE;
     }
