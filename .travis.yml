@@ -3,14 +3,13 @@ language: php
 php:
   - 5.3
 env:
-  - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=5.10.0.0 PATCH="5.10.0...coverage-5.10.0"
-  - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=6.2.0.0 PATCH="6.2.0...coverage-6.2.0"
+  - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=5.10.0 PATCH="5.10.0...coverage-5.10.0"
+  - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=6.2.0 PATCH="6.2.0...coverage-6.2.0"
 install:
-  - pear channel-discover pear.drush.org
-  - pear install drush/drush-$DRUSH_VERSION
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer global require drush/drush:$DRUSH_VERSION
   - composer install --dev --no-interaction --prefer-source
-  - export README=`pear list-files drush/drush-$DRUSH_VERSION | grep drush.php | awk '{print $2}'`
-  - export DRUSH_DIR=`dirname $README`
+  - export DRUSH_DIR=~/.composer/vendor/drush/drush
   - cd $DRUSH_DIR
   - wget https://github.com/xendk/drush/compare/$PATCH.diff -O coverage.patch
   - patch -p1 < coverage.patch
@@ -18,7 +17,7 @@ install:
   - cd -
   - mkdir cov
 before_script:
-  - export BOOTSTRAP=`pear list-files drush/drush-$DRUSH_VERSION | grep drush_testcase.inc | awk '{print $2}'`
+  - export BOOTSTRAP=$DRUSH_DIR/tests/drush_testcase.inc
 script: phpunit --bootstrap=$BOOTSTRAP --coverage-clover=`pwd`/cov/clover.xml tests
 notifications:
   flowdock: 78b17a3314f1bac5207d8e65e391287b
