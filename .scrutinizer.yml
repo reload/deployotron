@@ -1,0 +1,23 @@
+tools:
+  php_mess_detector:
+    extensions:
+      - php
+      - inc
+  php_code_sniffer:
+    config:
+      standard: Drupal
+    extensions:
+      - php
+      - inc
+  php_cpd:
+    names:
+      - '*.php'
+      - '*.inc'
+  php_loc:
+    names:
+      1: '*.inc'
+      2: '*.php'
+  php_pdepend:
+    suffixes:
+      - php
+      - inc
