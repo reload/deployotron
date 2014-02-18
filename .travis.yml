@@ -3,7 +3,7 @@ language: php
 php:
   - 5.3
 env:
-  - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=5.10.0 PATCH="5.10.0...coverage-5.10.0"
+  # - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=5.10.0 PATCH="5.10.0...coverage-5.10.0"
   - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=6.2.0 PATCH="6.2.0...coverage-6.2.0"
 install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
