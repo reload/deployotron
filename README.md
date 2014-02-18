@@ -11,6 +11,7 @@ usable as a part of a bigger setup.
 
 [![Build Status](https://travis-ci.org/reload/deployotron.png?branch=master)](https://travis-ci.org/reload/deployotron)
 [![Coverage Status](https://coveralls.io/repos/reload/deployotron/badge.png?branch=master)](https://coveralls.io/r/reload/deployotron?branch=master)
+[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/reload/deployotron/badges/quality-score.png?s=cd9fde12be1b74734b00d59618d4eb6c1bf5bfb0)](https://scrutinizer-ci.com/g/reload/deployotron/)
 
 Overview
 ========
