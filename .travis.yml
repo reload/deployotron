@@ -3,14 +3,22 @@ language: php
 php:
   - 5.3
 env:
-  # - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=5.10.0 PATCH="5.10.0...coverage-5.10.0"
+  - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=5.10.0 PATCH="5.10.0...coverage-5.10.0"
   - UNISH_DB_URL=mysql://root:@127.0.0.1 DRUSH_VERSION=6.2.0 PATCH="6.2.0...coverage-6.2.0"
 install:
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - composer global require drush/drush:$DRUSH_VERSION
+  # Install Drush 6+ using composer.
+  - if ( test $DRUSH_VERSION != 5.10.0 ); then export PATH="$HOME/.composer/vendor/bin:$PATH"; fi
+  - if ( test $DRUSH_VERSION != 5.10.0 ); then composer global require drush/drush:$DRUSH_VERSION; fi
+  - if ( test $DRUSH_VERSION != 5.10.0 ); then export DRUSH_DIR=~/.composer/vendor/drush/drush; fi
+  # Install Drush 5 manually, as it's not installable using composer.
+  - if ( test $DRUSH_VERSION = 5.10.0 ); then export PATH="$HOME/drush:$PATH"; fi
+  - if ( test $DRUSH_VERSION = 5.10.0 ); then git clone https://github.com/drush-ops/drush.git ~/drush; fi
+  - if ( test $DRUSH_VERSION = 5.10.0 ); then cd ~/drush; git checkout $DRUSH_VERSION; cd -; fi
+  - if ( test $DRUSH_VERSION = 5.10.0 ); then export DRUSH_DIR=~/drush; fi
+  # Install dependencies (coveralls at this time).
   - composer install --dev --no-interaction --prefer-source
-  - export DRUSH_DIR=~/.composer/vendor/drush/drush
   - cd $DRUSH_DIR
+  # Get and apply coverage collection patch.
   - wget https://github.com/xendk/drush/compare/$PATCH.diff -O coverage.patch
   - patch -p1 < coverage.patch
   - phpenv rehash
