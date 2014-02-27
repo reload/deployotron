@@ -468,13 +468,29 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function run($state) {
+      $fallback = FALSE;
       // http://stackoverflow.com/questions/3878624/how-do-i-programmatically-determine-if-there-are-uncommited-changes
       // claims this is the proper way. I'm inclined to agree.
+      // However, these are newer additions to Git, so fallback to git status
+      // if they fail.
       if (!$this->sh('git diff-files --quiet --ignore-submodules --')) {
-        return drush_set_error(dt('Repository not clean.'));
+        if ($this->shRc() != 129) {
+          return drush_set_error(dt('Repository not clean.'));
+        }
+        $fallback = TRUE;
       }
-      if (!$this->sh('git diff-index --cached --quiet HEAD --ignore-submodules --')) {
-        return drush_set_error(dt('Uncommitted changes in the index.'));
+      if (!$fallback) {
+        if (!$this->sh('git diff-index --cached --quiet HEAD --ignore-submodules --')) {
+          if ($this->shRc() != 129) {
+            return drush_set_error(dt('Uncommitted changes in the index.'));
+          }
+          $fallback = TRUE;
+        }
+      }
+      if ($fallback) {
+        if (!$this->sh('git status -s')) {
+          return drush_set_error(dt('Repository not clean.'));
+        }
       }
 
       return TRUE;
