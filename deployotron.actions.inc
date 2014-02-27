@@ -111,6 +111,16 @@ namespace Deployotron {
     protected $drushResult;
 
     /**
+     * Array of the output of the last executed command.
+     */
+    protected $shOutput;
+
+    /**
+     * Return code of the last executed command.
+     */
+    protected $shRc;
+
+    /**
      * Shas of checkouts of aliases.
      */
     static protected $headShas = array();
@@ -289,7 +299,7 @@ namespace Deployotron {
      *   The output.
      */
     protected function shOutput() {
-      return implode("\n",  $this->shOutputArray());
+      return implode("\n", $this->shOutputArray());
     }
 
     /**
@@ -299,11 +309,21 @@ namespace Deployotron {
      *   Lines of output.
      */
     protected function shOutputArray() {
-      return drush_shell_exec_output();
+      return $this->shOutput;
+    }
+
+    /**
+     * Get the return code of the most recent command.
+     */
+    protected function shRc() {
+      return $this->shRc;
     }
 
     /**
      * Execute a sh locally.
+     *
+     * Works much like drush_shell_exec, however it captures the command return
+     * code too, and doesn't support interactive mode.
      *
      * @param string $command
      *   Command to run.
@@ -312,10 +332,36 @@ namespace Deployotron {
      *   Whether the command succeeded.
      */
     protected function shLocal($command) {
-      if (!drush_shell_exec($command)) {
-        return FALSE;
+      $this->shOutput = array();
+      $this->shRc = 0;
+      $args = func_get_args();
+      // Escape args, but not the command.
+      for ($x = 1; $x < count($args); $x++) {
+        $args[$x] = drush_escapeshellarg($args[$x]);
       }
-      return TRUE;
+      // Mimic drush_shell_exec(), which can take a single or multiple args.
+      if (count($args) == 1) {
+        $command = $args[0];
+      }
+      else {
+        $command = call_user_func_array('sprintf', $args);
+      }
+
+      if (drush_get_context('DRUSH_VERBOSE') || drush_get_context('DRUSH_SIMULATE')) {
+        drush_print('Executing: ' . $command, 0, STDERR);
+      }
+      if (!drush_get_context('DRUSH_SIMULATE')) {
+        exec($command . ' 2>&1', $this->shOutput, $this->shRc);
+
+        if (drush_get_context('DRUSH_DEBUG')) {
+          foreach ($this->shOutput as $line) {
+            drush_print($line, 2);
+          }
+        }
+      }
+
+      // Exit code 0 means success.
+      return ($this->shRc == 0);
     }
 
     /**
