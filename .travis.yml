@@ -15,8 +15,6 @@ install:
   - if ( test $DRUSH_VERSION = 5.10.0 ); then git clone https://github.com/drush-ops/drush.git ~/drush; fi
   - if ( test $DRUSH_VERSION = 5.10.0 ); then cd ~/drush; git checkout $DRUSH_VERSION; cd -; fi
   - if ( test $DRUSH_VERSION = 5.10.0 ); then export DRUSH_DIR=~/drush; fi
-  # Install dependencies (coveralls at this time).
-  - composer install --dev --no-interaction --prefer-source
   - cd $DRUSH_DIR
   # Get and apply coverage collection patch.
   - wget https://github.com/xendk/drush/compare/$PATCH.diff -O coverage.patch
