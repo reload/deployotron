@@ -1,5 +1,0 @@
-# Configuration file for https://coveralls.io/
-
-coverage_clover: cov/clover.xml
-src_dir: .
-json_path: cov/coveralls-upload.json

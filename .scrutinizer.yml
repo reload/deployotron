@@ -21,3 +21,4 @@ tools:
     suffixes:
       - php
       - inc
+  external_code_coverage: true

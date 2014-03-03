@@ -30,4 +30,5 @@ script: phpunit --bootstrap=$BOOTSTRAP --coverage-clover=`pwd`/cov/clover.xml te
 notifications:
   flowdock: 78b17a3314f1bac5207d8e65e391287b
 after_script:
-  - php vendor/bin/coveralls -v
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --access-token="6a8f6eefedb38d68ac15c25112c6a893c3c4341d1ac5d8adc5f2d6799a969abc" --format=php-clover cov/clover.xml
