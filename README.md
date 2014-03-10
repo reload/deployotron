@@ -26,7 +26,7 @@ root of the site on the webserver is a git checkout, and
 That you've set up Drush aliases to reach the live webserver.
 
 For everyone's sanity, we suggest having a Drush alias file in
-sites/all/drush/<short-site-alias>.aliases.drushrc.php that defines
+`sites/all/drush/<short-site-alias>.aliases.drushrc.php` that defines
 relevant environments (production, dev, etc.), so that everybody is
 using the same settings.
 
