@@ -29,7 +29,6 @@ namespace Deployotron {
       ),
       'wtf' => array(
         'RestartApache2',
-        'UpdateDatabase',
         'ClearCache',
         'RestartVarnish',
       ),
