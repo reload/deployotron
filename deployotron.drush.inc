@@ -54,6 +54,27 @@ function deployotron_drush_command() {
     }
   }
 
+  $items['wtf'] = array(
+    'description' => 'Try to restore clear caches and restart services.',
+    'command-hook' => 'deployotron_run',
+    'callback arguments' => array('wtf'),
+    'arguments' => array(
+      'site-alias' => 'Site alias to try and clear.',
+    ),
+    'options' => array(
+      'no-confirm' => 'Do not require confirmation before running.',
+    ),
+    'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
+    'aliases' => array(
+      'omg',
+    ),
+  );
+  foreach (ActionFactory::getActions('wtf') as $action) {
+    if ($options = $action->getOptions()) {
+      $items['wtf']['options'] += $options;
+    }
+  }
+
   $items['deployotron-actions'] = array(
     'description' => 'Display the actions run by deployotron.',
     'hidden' => TRUE,
@@ -81,6 +102,9 @@ function deployotron_drush_help($section) {
 
     case 'drush:oh-my-god':
       return dt("Try to find a backup, and restore it to the site.");
+
+    case 'drush:wtf':
+      return dt("Try to restore clear caches and restart services.");
 
   }
 }

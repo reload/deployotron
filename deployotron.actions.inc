@@ -27,6 +27,12 @@ namespace Deployotron {
         'DeployCode',
         'RestoreDatabase',
       ),
+      'wtf' => array(
+        'RestartApache2',
+        'UpdateDatabase',
+        'ClearCache',
+        'RestartVarnish',
+      ),
     );
 
     /**
