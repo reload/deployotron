@@ -65,9 +65,6 @@ function deployotron_drush_command() {
       'no-confirm' => 'Do not require confirmation before running.',
     ),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
-    'aliases' => array(
-      'omg',
-    ),
   );
   foreach (ActionFactory::getActions('wtf') as $action) {
     if ($options = $action->getOptions()) {
