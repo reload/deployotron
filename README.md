@@ -30,10 +30,15 @@ For everyone's sanity, we suggest having a Drush alias file in
 relevant environments (production, dev, etc.), so that everybody is
 using the same settings.
 
+And we suggest that deployotron is installed by copying it into the
+`sites/all/drush` folder and committed to the site repository. This
+ensures that everyone is running the exact same version of deployotron
+when deploying.
+
 Setup
 =====
 
-Clone Deployotron into sites/all/drush.
+Clone Deployotron into `sites/all/drush`. 
 
 Create a `<sitename>.aliases.drushrc.php` file in the same directory,
 with the definition of the different environments.
@@ -79,6 +84,20 @@ Example configuration:
       ),
     );
 
+In addition to command line options you can add messages to be
+displayed to the deploying user by using the following keys:
+
+
+ * `message`: Shown at confirmation and after deployment.
+ * `confirm_message`: Shown at confirmation.
+ * `done_message`: Shown after deployment.
+ * `confirm_message_<command>`: Shown at confirmation for the
+   `<command>`.
+ * `done_message_<command>`: Shown after deployment for the
+   `<command>`.
+
+These can be useful to remind the user of extra manual steps, or other
+things they should be aware.
 
 Recovering
 ----------
@@ -92,6 +111,12 @@ This will try to find recent database dumps, ask which to use and
 attempt to import the database and revert the codebase to the previous
 revision. It will not attempt to clear caches or restarting any
 services.
+
+Help
+----
+
+Running `drush deployotron-actions` will give a full list of which
+commands uses which actions, and the options of all actions.
 
 Sudo setup
 ==========
