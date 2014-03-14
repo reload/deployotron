@@ -44,6 +44,9 @@ namespace Deployotron {
       }
     }
 
+    /**
+     * Output help on actions and options.
+     */
     static public function getHelp() {
       $all_actions = array();
       drush_print('Commands');
@@ -68,11 +71,7 @@ namespace Deployotron {
         // Print options.
         $options = $class_name::getOptions();
         if ($options) {
-          $table = array(array('Options:'));
-          foreach ($options as $name => $desc) {
-            $table[] = array('label' => '--' . $name, 'desc' => $desc);
-          }
-          drush_print_table($table, TRUE, array('label' => 40));
+          drush_print_table(drush_format_help_section($options, 'options'));
           drush_print();
         }
         drush_print();
@@ -138,8 +137,12 @@ namespace Deployotron {
     /**
      * Get the command line options for this action.
      *
+     * If the command has an enable-switch, the kill-switch and command options
+     * are classed as sub-options for nice help output. If there's no
+     * enable-switch, all options are considered regular options.
+     *
      * @return array
-     *   Options as defined on commands in hook_drush_command().
+     *   Options and sub-options as defined on commands in hook_drush_command().
      */
     public static function getOptions() {
       $options = array();
@@ -148,12 +151,28 @@ namespace Deployotron {
           static::$killSwitch => "Don't " . static::$short . (isset(static::$enableSwitch) ? ' (overrides --' . static::$enableSwitch . ')' : '') . '.',
         );
       }
+
+      $options += static::$options;
+
       if (isset(static::$enableSwitch)) {
-        $options += array(
-          static::$enableSwitch => ucfirst(static::$short) . '.',
+        $sub_options = $options;
+        $options = array();
+        // If the action options defines the enable switch, use it so
+        // description and possible examle-values propergate.
+        if (isset($sub_options[static::$enableSwitch])) {
+          $options[static::$enableSwitch] = $sub_options[static::$enableSwitch];
+          unset($sub_options[static::$enableSwitch]);
+        }
+        else {
+          $options[static::$enableSwitch] = ucfirst(static::$short) . '.';
+        }
+        return array(
+          'options' => $options,
+          'sub-options' => !empty($sub_options) ? array(static::$enableSwitch => $sub_options) : array(),
         );
       }
-      return $options + static::$options;
+
+      return array('options' => $options, 'sub-options' => array());
     }
 
     /**
@@ -661,7 +680,10 @@ namespace Deployotron\Actions {
     static protected $short = 'dump database';
     static protected $help = 'Makes a SQL dump of the site database.';
     static protected $options = array(
-      'dump-dir' => 'Directory for database dumps.',
+      'dump-dir' => array(
+        'description' => 'Directory for database dumps.',
+        'example-value' => 'path',
+      ),
     );
 
     /**
@@ -704,7 +726,10 @@ namespace Deployotron\Actions {
     static protected $runMessage = 'Restoring database';
     static protected $short = 'restore database';
     static protected $options = array(
-      'file' => 'Database dump file to restore.',
+      'file' => array(
+        'description' => 'Database dump file to restore.',
+        'example-value' => 'filename',
+      ),
     );
 
     /**
@@ -758,7 +783,10 @@ namespace Deployotron\Actions {
     static protected $killSwitch = 'no-restart-apache2';
     static protected $short = 'restart apache2';
     static protected $options = array(
-      'restart-apache2-command' => 'Override command used to restart Apache2.',
+      'restart-apache2-command' => array(
+        'description' => 'Override command used to restart Apache2.',
+        'example-value' => 'command',
+      ),
     );
 
     /**
@@ -782,7 +810,10 @@ namespace Deployotron\Actions {
     static protected $killSwitch = 'no-restart-varnish';
     static protected $short = 'restart varnish';
     static protected $options = array(
-      'restart-varnish-command' => 'Override command used to restart Varnish.',
+      'restart-varnish-command' => array(
+        'description' => 'Override command used to restart Varnish.',
+        'example-value' => 'path',
+      ),
     );
 
     /**
@@ -845,7 +876,10 @@ namespace Deployotron\Actions {
     static protected $short = 'preparing';
     static protected $help = 'Prepares restoring by looking for dumps to import.';
     static protected $options = array(
-      'dump-dir' => 'Directory for database dumps.',
+      'dump-dir' => array(
+        'description' => 'Directory for database dumps.',
+        'example-value' => 'path',
+      ),
     );
 
     /**
@@ -970,7 +1004,10 @@ namespace Deployotron\Actions {
     static protected $short = 'send Flowdock notification';
     static protected $enableSwitch = 'flowdock-token';
     static protected $options = array(
-      'flowdock-token' => 'Flowdock token.',
+      'flowdock-token' => array(
+        'description' => 'Flowdock token.',
+        'example-value' => 'token',
+      ),
     );
 
     /**
@@ -1031,9 +1068,18 @@ namespace Deployotron\Actions {
     static protected $short = 'send new relic notification';
     static protected $enableSwitch = 'newrelic-api-key';
     static protected $options = array(
-      'newrelic-app-name' => 'New Relic application name.',
-      'newrelic-app-id' => 'New Relic application id.',
-      'newrelic-api-key' => 'New Relic API key.',
+      'newrelic-app-name' => array(
+        'description' => 'New Relic application name.',
+        'example-value' => 'name',
+      ),
+      'newrelic-app-id' => array(
+        'description' => 'New Relic application id.',
+        'example-value' => 'id',
+      ),
+      'newrelic-api-key' => array(
+        'description' => 'New Relic API key.',
+        'example-value' => 'key',
+      ),
     );
 
     /**

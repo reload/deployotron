@@ -25,11 +25,13 @@ function deployotron_drush_command() {
     'options' => array(
       'no-confirm' => 'Do not require confirmation before running.',
     ),
+    'sub-options' => array(),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
   );
   foreach (ActionFactory::getActions('deploy') as $action) {
     if ($options = $action->getOptions()) {
-      $items['deploy']['options'] += $options;
+      $items['deploy']['options'] += $options['options'];
+      $items['deploy']['sub-options'] += $options['sub-options'];
     }
   }
 
@@ -43,6 +45,7 @@ function deployotron_drush_command() {
     'options' => array(
       'no-confirm' => 'Do not require confirmation before running.',
     ),
+    'sub-options' => array(),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_ROOT,
     'aliases' => array(
       'omg',
@@ -50,7 +53,8 @@ function deployotron_drush_command() {
   );
   foreach (ActionFactory::getActions('omg') as $action) {
     if ($options = $action->getOptions()) {
-      $items['oh-my-god']['options'] += $options;
+      $items['oh-my-god']['options'] += $options['options'];
+      $items['oh-my-god']['sub-options'] += $options['sub-options'];
     }
   }
 
