@@ -5,6 +5,12 @@
  */
 
 namespace Deployotron {
+
+  define('COLOR_RED', "\033[1;31;40m\033[1m");
+  define('COLOR_YELLOW', "\033[1;33;40m\033[1m");
+  define('COLOR_GREEN', "\033[1;32;40m\033[1m");
+  define('COLOR_RESET', "\033[0m");
+
   class ActionFactory {
     static protected $actionMapping = array(
       'deploy' => array(
@@ -479,14 +485,31 @@ namespace Deployotron\Actions {
    * Check for locally modified files and do a dry-run checkout.
    */
   class SanityCheck extends Action {
-    static protected $description = 'Check that the git repository is clean.';
     static protected $runMessage = 'Sanity checking';
     static protected $short = 'sanity check';
+    static protected $options = array(
+      'insanity' => "Don't check that the server repository is clean. Might cause data loss.",
+    );
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDescription() {
+      if (drush_get_option('insanity', FALSE)) {
+        return COLOR_YELLOW . dt('Skipping sanity check of deployed repo. Might cause data loss or Git failures.') . COLOR_RESET;
+      }
+
+      return dt('Check that the deployed git repository is clean.');
+    }
 
     /**
      * {@inheritdoc}
      */
     public function run($state) {
+      if (drush_get_option('insanity', FALSE)) {
+        drush_log(dt('Skipping sanity check of deployed repo.'), 'warning');
+        return TRUE;
+      }
       $fallback = FALSE;
       // http://stackoverflow.com/questions/3878624/how-do-i-programmatically-determine-if-there-are-uncommited-changes
       // claims this is the proper way. I'm inclined to agree.
