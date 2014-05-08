@@ -465,7 +465,14 @@ namespace Deployotron {
       if (!isset(self::$headShas[$name]) || $no_cache) {
         self::$headShas[$name] = '';
         if ($this->sh('git rev-parse HEAD')) {
-          self::$headShas[$name] = trim($this->shOutput());
+          $sha = trim($this->shOutput());
+          // Confirm that we can see the HEAD locally.
+          if ($this->shLocal('git show ' . $sha)) {
+            self::$headShas[$name] = $sha;
+          }
+          else {
+            drush_log(dt("Could not find the deployed HEAD (@sha) locally, you pulled recently?", array('@sha' => $sha)), 'warning');
+          }
         }
       }
       return self::$headShas[$name];
@@ -559,7 +566,12 @@ namespace Deployotron\Actions {
     public function getDescription() {
       $this->shLocal('git log --pretty="format:%an <%ae> @ %ci (%cr)%n%n%B" --color --no-walk ' . $this->sha);
       $commit = $this->shOutput();
-      $this->shLocal('git diff --color --stat ' . $this->getHead() . ' ' . $this->sha);
+      $head = $this->getHead();
+      if (!$head) {
+        return COLOR_YELLOW . dt("Cannot find the deployed HEAD.") . COLOR_RESET;
+
+      }
+      $this->shLocal('git diff --color --stat ' . $head . ' ' . $this->sha);
       $stat = $this->shOutput();
       $stat = explode("\n", $stat);
       if (count($stat) > 20) {
