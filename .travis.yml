@@ -1,4 +1,4 @@
-# Configuration for Travis CI at http://travis-ci.org/#!/xendk/drake
+# Configuration for Travis CI at http://travis-ci.org/#!/reload/deployotron
 language: php
 php:
   - 5.3
