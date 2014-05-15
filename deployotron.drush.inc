@@ -55,11 +55,11 @@ function deployotron_drush_command() {
   }
 
   $items['wtf'] = array(
-    'description' => 'Try to restore clear caches and restart services.',
+    'description' => 'Clear caches and restart services.',
     'command-hook' => 'deployotron_run',
     'callback arguments' => array('wtf'),
     'arguments' => array(
-      'site-alias' => 'Site alias to try and clear.',
+      'site-alias' => 'Site alias to clear and restart.',
     ),
     'options' => array(
       'no-confirm' => 'Do not require confirmation before running.',
@@ -101,7 +101,7 @@ function deployotron_drush_help($section) {
       return dt("Try to find a backup, and restore it to the site.");
 
     case 'drush:wtf':
-      return dt("Try to restore clear caches and restart services.");
+      return dt("Clear caches and restart services.");
 
   }
 }
