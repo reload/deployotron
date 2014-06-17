@@ -24,6 +24,7 @@ namespace Deployotron {
         'RunDrakePostUpdate',
         'ClearCache',
         'SiteOnline',
+        'PurgeDatabaseBackups',
         'RestartVarnish',
         'FlowdockNotificaton',
         'NewRelicNotificaton',
@@ -716,10 +717,17 @@ namespace Deployotron\Actions {
     static protected $help = 'Makes a SQL dump of the site database.';
     static protected $options = array(
       'dump-dir' => array(
-        'description' => 'Directory for database dumps.',
+        'description' => 'Directory for database dumps, defaults to /tmp.',
         'example-value' => 'path',
       ),
     );
+
+    /**
+     * Get the name of a dump.
+     */
+    public static function filename($date_str, $sha) {
+      return sprintf("%s/deploy.%s.%s.sql", drush_get_option('dump-dir', '/tmp'), $date_str, $sha);
+    }
 
     /**
      * {@inheritdoc}
@@ -750,7 +758,7 @@ namespace Deployotron\Actions {
         $date = date('Y-m-d\TH:i:s');
       }
 
-      return sprintf("%s/deploy.%s.%s.sql", drush_get_option('dump-dir', '/tmp'), $date, $this->getHead());
+      return static::filename($date, $this->getHead());
     }
   }
 
@@ -804,6 +812,72 @@ namespace Deployotron\Actions {
         return drush_set_error('Error restoring database.');
       }
 
+      return TRUE;
+    }
+  }
+
+  class PurgeDatabaseBackups extends Action {
+    static protected $runMessage = 'Purging old database dumps.';
+    static protected $short = 'purge old dumps';
+    static protected $options = array(
+      'num-dumps' => array(
+        'description' => 'Number of database dumps to keep. 0 for unlimited.',
+        'example-value' => '5',
+      ),
+    );
+
+    /**
+     * Dumps to delete;
+     */
+    protected $deleteDumps = array();
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validate() {
+      $dumping = TRUE;
+      if (drush_get_option('no-dump', FALSE)) {
+        $dumping = FALSE;
+      }
+      $max_dumps = drush_get_option('num-dumps', 5);
+
+      if ($max_dumps > 0) {
+        // If we're dumping a new dump, we need to keep one less than the max to
+        // make room for the new one.
+        $keep = $max_dumps - ($dumping ? 1 : 0);
+        $this->sh('ls ' . BackupDatabase::filename('*', '*'));
+        $dumps = $this->shOutputArray();
+        if (count($dumps) > $keep) {
+          // Reverse sort to get the newest first.
+          rsort($dumps);
+          $this->deleteDumps = array_slice($dumps, $keep);
+        }
+      }
+
+      return TRUE;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDescription() {
+      if (count($this->deleteDumps)) {
+        return dt("Purge the following dump files:\n@files.", array('@files' => implode("\n", $this->deleteDumps)));
+
+      }
+      return dt("Not purging any dumps.");
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run($state) {
+      if (count($this->deleteDumps)) {
+        $this->sh('rm ' . implode(" ", array_map('drush_escapeshellarg', $this->deleteDumps)));
+      }
+
+      // We don't consider failure to delete dumps serious enough to fail the
+      // deployment.
       return TRUE;
     }
   }

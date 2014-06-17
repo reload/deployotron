@@ -79,8 +79,9 @@ Example configuration:
       'root' => '/path',
       'deployotron' => array(
         'branch' => 'develop',
-        'dump-dir' => '/backups',
-        'restart-apache2' => TRUE,
+        'dump-dir' => '/backups', // Defaults to /tmp.
+        'num-dumps' => 3, // Defaults to 5. 0 for unlimited.
+        'restart-apache2' => TRUE, // Defaults to FALSE.
       ),
     );
 

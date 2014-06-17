@@ -462,36 +462,47 @@ class DeployotronCase extends Drush_CommandTestCase {
       'fbcaa29d45716edcbedc3c325bfbab828f1ce838',
     );
 
-    // Create a bunch of dumps.
+    // Create a bunch of dumps, setting num-dumps to zero in order not to purge
+    // any.
     foreach (range(1, 2) as $num) {
       foreach ($shas as $sha) {
-        $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => $sha), NULL, $this->webroot());
+        $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => $sha, 'num-dumps' => 0), NULL, $this->webroot());
         $this->assertRegExp('/HEAD now at ' . $sha . '/', $this->getOutput());
+        $this->assertRegExp('/Not purging any dumps/', $this->getOutput());
         $expected_num_dumps++;
         $this->assertCount($expected_num_dumps, $this->fileList($this->dumpPath()));
       }
     }
 
     $dumps = $this->fileList($this->dumpPath());
-    sort($dumps);
-    $expected_dumps = array_slice($dumps, -5, 5);
+    // Reverse sort to get the newest first.
+    rsort($dumps);
+    // One less, we'll prepend the newest dump later;
+    $expected_dumps = array_slice($dumps, 0, 4);
 
-    // Now limit the amount of dumps and check the number.
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => $sha, 'num-dumps' => 5), NULL, $this->webroot());
+    // Don't specify num-dumps, which should default to 5.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => $sha), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at ' . $sha . '/', $this->getOutput());
+    $this->assertRegExp('/Purge the following dump files/', $this->getOutput());
     $this->assertCount(5, $this->fileList($this->dumpPath()));
     $dumps = $this->fileList($this->dumpPath());
-    sort($dumps);
-    $this->assertEqual($expected_dumps, $dumps);
+    rsort($dumps);
+    // Prepend the newly created dump onto the expected.
+    array_unshift($expected_dumps, $dumps[0]);
+    $this->assertEquals($expected_dumps, $dumps);
 
-    $expected_dumps = array_slice($dumps, -3, 3);
+    // One less, we'll prepend the newest dump later;
+    $expected_dumps = array_slice($dumps, 0, 2);
 
-    // And again.
+    // And again with a specified num-dumps.
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => $sha, 'num-dumps' => 3), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at ' . $sha . '/', $this->getOutput());
-    $this->assertCount(5, $this->fileList($this->dumpPath()));
+    $this->assertRegExp('/Purge the following dump files/', $this->getOutput());
+    $this->assertCount(3, $this->fileList($this->dumpPath()));
     $dumps = $this->fileList($this->dumpPath());
-    sort($dumps);
-    $this->assertEqual($expected_dumps, $dumps);
+    rsort($dumps);
+    // Prepend the newly created dump onto the expected.
+    array_unshift($expected_dumps, $dumps[0]);
+    $this->assertEquals($expected_dumps, $dumps);
   }
 }
