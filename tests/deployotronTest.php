@@ -125,6 +125,17 @@ class DeployotronCase extends Drush_CommandTestCase {
   }
 
   /**
+   * Get a list of files in a directory.
+   */
+  public function fileList($dir) {
+    exec('ls ' . escapeshellarg($dir), $output, $rc);
+    if ($rc === 0) {
+      return $output;
+    }
+    return array();
+  }
+
+  /**
    * Test help commands.
    */
   public function testHelp() {
@@ -432,5 +443,55 @@ class DeployotronCase extends Drush_CommandTestCase {
 
     // Check Flowdock message.
     $this->assertRegExp('/No version deployed, not sending Flowdock notification/', $this->getOutput());
+  }
+
+  /**
+   * Test dump file purging.
+   */
+  public function testDumpFilePurging() {
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
+
+    $expected_num_dumps = 0;
+    // Check that the dumpdir is empty.
+    $this->assertCount($expected_num_dumps, $this->fileList($this->dumpPath()));
+
+    $shas = array(
+      '04256b5992d8b4a4fae25c7cb7888583749fabc0',
+      'b9471948c3f83a665dd4f106aba3de8962d69b42',
+      'fbcaa29d45716edcbedc3c325bfbab828f1ce838',
+    );
+
+    // Create a bunch of dumps.
+    foreach (range(1, 2) as $num) {
+      foreach ($shas as $sha) {
+        $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => $sha), NULL, $this->webroot());
+        $this->assertRegExp('/HEAD now at ' . $sha . '/', $this->getOutput());
+        $expected_num_dumps++;
+        $this->assertCount($expected_num_dumps, $this->fileList($this->dumpPath()));
+      }
+    }
+
+    $dumps = $this->fileList($this->dumpPath());
+    sort($dumps);
+    $expected_dumps = array_slice($dumps, -5, 5);
+
+    // Now limit the amount of dumps and check the number.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => $sha, 'num-dumps' => 5), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at ' . $sha . '/', $this->getOutput());
+    $this->assertCount(5, $this->fileList($this->dumpPath()));
+    $dumps = $this->fileList($this->dumpPath());
+    sort($dumps);
+    $this->assertEqual($expected_dumps, $dumps);
+
+    $expected_dumps = array_slice($dumps, -3, 3);
+
+    // And again.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'branch' => '', 'sha' => $sha, 'num-dumps' => 3), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at ' . $sha . '/', $this->getOutput());
+    $this->assertCount(5, $this->fileList($this->dumpPath()));
+    $dumps = $this->fileList($this->dumpPath());
+    sort($dumps);
+    $this->assertEqual($expected_dumps, $dumps);
   }
 }
