@@ -565,13 +565,21 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function getDescription() {
-      $this->shLocal('git log --pretty="format:%an <%ae> @ %ci (%cr)%n%n%B" --color --no-walk ' . $this->sha);
-      $commit = $this->shOutput();
       $head = $this->getHead();
       if (!$head) {
         return COLOR_YELLOW . dt("Cannot find the deployed HEAD.") . COLOR_RESET;
-
       }
+
+      // Collect info and log entry for the commit we're deploying.
+      $this->shLocal('git log --pretty="format:%an <%ae> @ %ci (%cr)%n%n%B" --color --no-walk ' . $this->sha);
+      $commit_info = $this->shOutput();
+
+      // Collect info and log entry for the deployed head.
+      $this->shLocal('git log --pretty="format:%an <%ae> @ %ci (%cr)%n%n%B" --color --no-walk ' . $head);
+      $head_info = $this->shOutput();
+
+      // Create diffstat between the deployed commit and the one we're
+      // deploying.
       $this->shLocal('git diff --color --stat ' . $head . ' ' . $this->sha);
       $stat = $this->shOutput();
       $stat = explode("\n", $stat);
@@ -579,7 +587,15 @@ namespace Deployotron\Actions {
         $stat = array_merge(array_slice($stat, 0, 8), array('', ' ...', ''), array_slice($stat, -8));
       }
 
-      return dt("Run git fetch and check out @sha:\n!info", array('@sha' => $this->sha, '!info' => $commit . "\n\nAll changes:\n" . implode("\n", $stat)));
+      $desc = dt("Run git fetch and check out @sha:\n", array('@sha' => $this->sha));
+      $desc .= $commit_info . "\n\n";
+
+      $desc .= dt("Currently deployed: @sha\n", array('@sha' => $head));
+      $desc .= $head_info . "\n\n";
+
+      $desc .= dt("All changes:\n!changes", array('!changes' => implode("\n", $stat)));
+
+      return $desc;
     }
 
     /**
