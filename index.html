@@ -1,79 +1,100 @@
+
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Deployotron : Get it out there">
-
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
+    <meta charset="utf-8">
     <title>Deployotron</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.css" media="screen">
+    <link rel="stylesheet" href="css/deployotron.css" media="screen">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="../bower_components/html5shiv/dist/html5shiv.js"></script>
+      <script src="../bower_components/respond/dest/respond.min.js"></script>
+    <![endif]-->
+    <script>
+
+     var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-54809714-1']);
+      _gaq.push(['_trackPageview']);
+
+     (function() {
+       var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+     })();
+
+    </script>
   </head>
-
   <body>
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="../" class="navbar-brand">Deployotron</a>
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div class="navbar-collapse collapse" id="navbar-main">
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/reload/deployotron">View on GitHub</a>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="https://github.com/reload/deployotron">View on GitHub</a></li>
+          </ul>
 
-          <h1 id="project_title">Deployotron</h1>
-          <h2 id="project_tagline">Get it out there</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/reload/deployotron/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/reload/deployotron/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
+        </div>
+      </div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <p>Deploy your Drupal site in five easy steps:</p>
 
-<ul>
-<li>Commit your site to Git
-Deployotron expects your site to be committed to the root of your
-Git repository.</li>
-<li>Install deployotron
-Copy deployotron into sites/all/drush and commit it. This ensures
-that everyone is using the same version when deploying.</li>
-<li>Fix your alias file
-Aliases makes Drush much more fun to use, and committing an
-aliases.drushrc.php in sites/all/drush makes it easy to share them
-with the rest of the team.</li>
-<li>Clone site to prod
-Clone the site repository where you want to deploy it to, using the
-same user as setup for the alias, to ensure that the permissions of
-the files are properly set up.</li>
-<li>PROFIT!!! (aka, deploy)
-Running the deploy command will ask you to confirm its actions,
-before doing it.</li>
-</ul>
-      </section>
+    <div class="container main">
+
+      <div class="page-header" id="banner">
+        <div class="row">
+          <div class="col-lg-12">
+            <h1>Deployotron</h1>
+            <p class="lead">Get it out there</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bs-docs-section">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <h2>Deploy your Drupal site in five easy steps:</h2>
+
+              <h3>Commit your site to Git</h3>
+              <p>Deployotron expects your site to be committed to the
+                root of your Git repository.</p>
+              <h3>Install deployotron</h3>
+              <p>Copy deployotron into <code>sites/all/drush</code>
+                and commit it. This ensures that everyone is using the
+                same version when deploying.</p>
+              <h3>Fix your alias file</h3>
+              <p>Aliases makes Drush much more fun to use, and
+                committing an <code>aliases.drushrc.php</code>
+                in <code>sites/all/drush</code> makes it easy to share
+                them with the rest of the team. It's also the place to
+                configure deployotron.</p>
+              <h3>Clone site to prod</h3>
+              <p>Clone the site repository where you want to deploy it
+                to, using the same user as setup for the alias, to
+                ensure that the permissions of the files are properly
+                set up.</p>
+              <h3>PROFIT!!! (aka, deploy)</h3>
+              <p>Running the deploy command will ask you to confirm
+                its actions, before doing it.</p>
+              <img class="img-responsive" src="images/deployment-confirmation.png" alt="Deployotron screenshot" />
+            </div>
+
+          </div>
+        </div>
+      </div>
+
     </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Deployotron maintained by <a href="https://github.com/reload">reload</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-54809714-1");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
-
-
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
   </body>
 </html>
