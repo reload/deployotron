@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -47,42 +46,102 @@
       </div>
     </div>
 
-
-    <div class="container main">
-
-      <div class="page-header" id="banner">
-        <div class="row">
-          <div class="col-lg-12">
+    <div class="page-header" id="banner">
+      <div class="row">
+        <div class="container">
+          <div class="col-sm-12">
             <h1>Deployotron</h1>
             <p class="lead">Get it out there</p>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="bs-docs-section">
-        <div class="row">
-          <div class="col-lg-12">
+    <div class="bs-docs-section">
+      <div class="row">
+        <div class="container">
+          <div class="col-sm-12">
             <div class="bs-component">
-              <h2>Deploy your Drupal site in five easy steps:</h2>
+              <!-- <h2>Deploy your Drupal site in five easy steps</h2> -->
+              <p>A deployment tool doesn't have to be complicated to
+                set up. Deployotron can deploy a new site in five steps,
+                and 3 of them you'd be doing anyway:</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row odd">
+        <div class="container">
+          <div class="col-sm-6">
+            <img class="img-responsive" src="images/commit.png" alt="Commit site screenshot" />
+          </div>
+          <div class="col-sm-6">
+            <div class="bs-component">
 
               <h3>Commit your site to Git</h3>
               <p>Deployotron expects your site to be committed to the
                 root of your Git repository.</p>
-              <h3>Install deployotron</h3>
-              <p>Copy deployotron into <code>sites/all/drush</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="container">
+
+          <div class="col-sm-6">
+            <div class="bs-component">
+              <h3>Install Deployotron</h3>
+              <p>Copy Deployotron into <code>sites/all/drush</code>
                 and commit it. This ensures that everyone is using the
                 same version when deploying.</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <img class="img-responsive" src="images/clone.png" alt="Cloning Deployotron screenshot" />
+          </div>
+        </div>
+      </div>
+
+      <div class="row odd">
+        <div class="container">
+          <div class="col-sm-6">
+            <img class="img-responsive" src="images/alias.png" alt="Alias screenshot" />
+</div>
+          <div class="col-sm-6">
+            <div class="bs-component">
               <h3>Fix your alias file</h3>
               <p>Aliases makes Drush much more fun to use, and
                 committing an <code>aliases.drushrc.php</code>
                 in <code>sites/all/drush</code> makes it easy to share
                 them with the rest of the team. It's also the place to
-                configure deployotron.</p>
+                configure Deployotron.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="container">
+          <div class="col-sm-6">
+            <div class="bs-component">
               <h3>Clone site to prod</h3>
               <p>Clone the site repository where you want to deploy it
                 to, using the same user as setup for the alias, to
                 ensure that the permissions of the files are properly
                 set up.</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <img class="img-responsive" src="images/clone2.png" alt="Clone site screenshot" />
+        </div>
+      </div>
+
+      <div class="row odd">
+        <div class="container">
+          <div class="col-sm-12">
+            <div class="bs-component">
               <h3>PROFIT!!! (aka, deploy)</h3>
               <p>Running the deploy command will ask you to confirm
                 its actions, before doing it.</p>
@@ -93,7 +152,22 @@
         </div>
       </div>
 
+      <div class="row">
+        <div class="container">
+          <div class="col-sm-12">
+            <div class="bs-component">
+              <h3>Oh no...</h3>
+              <p>Something bad happened? Run <code>drush omg
+                  @site</code> to re-import the last dump and checkout the
+                revision the site was at before deploying.</p>
+              <img class="img-responsive" src="images/omg.png" alt="Deployotron OMG command screenshot" />
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
   </body>
