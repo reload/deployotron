@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Deployotron : Get it out there">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Deployotron</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/reload/deployotron">View on GitHub</a>
+
+          <h1 id="project_title">Deployotron</h1>
+          <h2 id="project_tagline">Get it out there</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/reload/deployotron/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/reload/deployotron/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Deploy your Drupal site in five easy steps:</p>
+
+<ul>
+<li>Commit your site to Git
+Deployotron expects your site to be committed to the root of your
+Git repository.</li>
+<li>Install deployotron
+Copy deployotron into sites/all/drush and commit it. This ensures
+that everyone is using the same version when deploying.</li>
+<li>Fix your alias file
+Aliases makes Drush much more fun to use, and committing an
+aliases.drushrc.php in sites/all/drush makes it easy to share them
+with the rest of the team.</li>
+<li>Clone site to prod
+Clone the site repository where you want to deploy it to, using the
+same user as setup for the alias, to ensure that the permissions of
+the files are properly set up.</li>
+<li>PROFIT!!! (aka, deploy)
+Running the deploy command will ask you to confirm its actions,
+before doing it.</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Deployotron maintained by <a href="https://github.com/reload">reload</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-54809714-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
