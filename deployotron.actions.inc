@@ -538,7 +538,11 @@ namespace Deployotron\Actions {
         }
       }
       if ($fallback) {
-        if (!$this->sh('git status -s')) {
+        if (!$this->sh('git status -s --untracked-files=no')) {
+          return drush_set_error(dt('Error running git status -s --untracked-files=no.'));
+        }
+        $output = trim($this->shOutput());
+        if (!empty($output)) {
           return drush_set_error(dt('Repository not clean.'));
         }
       }
