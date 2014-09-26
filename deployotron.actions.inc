@@ -59,7 +59,10 @@ namespace Deployotron {
       drush_print('Commands');
       drush_print('--------');
       foreach (static::$actionMapping as $name => $actions) {
-        drush_print(wordwrap(dt("@name runs the actions: @actions", array('@name' => $name, '@actions' => implode(', ', $actions)))));
+        drush_print(wordwrap(dt('@name runs the actions: @actions', array(
+                '@name' => $name,
+                '@actions' => implode(', ', $actions),
+              ))));
         drush_print();
 
         $all_actions = array_merge($all_actions, $actions);
@@ -131,6 +134,9 @@ namespace Deployotron {
      */
     static protected $headShas = array();
 
+    /**
+     * Get help description.
+     */
     public static function getHelp() {
       if (isset(static::$help)) {
         return static::$help;
@@ -418,7 +424,8 @@ namespace Deployotron {
      *
      * This is based on options from configuration or command.
      *
-     * @return string The SHA to deploy.
+     * @return string
+     *   The SHA to deploy.
      */
     protected function pickSha($options = array()) {
       $options += array(
