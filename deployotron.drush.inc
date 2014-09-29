@@ -132,7 +132,6 @@ function drush_deployotron_run_validate($name, $site_alias = NULL) {
 function drush_deployotron_run($name, $site_alias) {
   global $_deployotron_actions, $_deployotron_rollbacks;
   $_deployotron_rollbacks = array();
-  $site = drush_sitealias_get_record($site_alias);
 
   $message = "About to:\n\n";
   $i = 1;
