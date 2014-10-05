@@ -1,0 +1,104 @@
+body {
+  position: relative;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-weight: 200;
+}
+
+
+h1, h2, h3 {
+  font-family: 'Squada One', sans-serif;
+  /* White headlines makes them pop */
+  color: #fff;
+}
+
+h1 {
+  /* Increase top margin by 50% to increase separation between sections. */
+  margin-top: 31.5px;
+}
+
+code {
+  /* Use the orange color from the superhero bootswatch theme for code as well.
+     It makes a nice contrast to the blue.
+     It is also used for links but we have few of those and a lot of links. */
+  color: #df691a;
+}
+
+.navbar {
+  /* Use a lighter blue color for the navbar. */
+  background-color: #697683;
+  /* Add even lighter blue border to separate navbar and jumbotron. */
+  border-bottom: 1px solid #8E979F;
+}
+
+.jumbotron {
+  /* Readjust padding as the menu also takes up som space in the top. */
+  padding: 40px 0 20px;
+
+  /* Add a lighter blue border to separate jumbotron from content. */
+  border-bottom: 1px solid #697683;
+}
+
+.jumbotron img {
+  /* Align the logo to the left of the title. */
+  display: block;
+  float: left;
+  height: 50px;
+  /* The top of the logo should align with the title */
+  margin-top: 30px;
+  margin-right: 5px;
+}
+
+.jumbotron h1 {
+  color: #fff;
+  text-transform: uppercase;
+}
+
+body > .container h1:first-child {
+  /* Hide the first title which is in a container directly under the body
+     i.e. not in the jumbotron. This should be the project title from the
+     markdown documents. */
+  display: none;
+}
+
+
+@media screen and (min-width: 480px) {
+
+  .jumbotron img {
+    /* Larger screen, larger logo */
+    height: 150px;
+    margin-right: 10px;
+  }
+
+}
+
+@media screen and (min-width: 768px) {
+
+  .jumbotron {
+    /* Larger screen, larger elements */
+    padding: 64px 0 32px;
+    border-bottom-width: 2px;
+  }
+
+  .jumbotron .container {
+    position: relative;
+  }
+
+  .jumbotron img {
+    float: none;
+    /* Align the logo to the right of the title and make it pop out of
+       the jumbotron expand into the menu and content. */
+    position: absolute;
+    height: 325px;
+    top: -74px;
+    right: 0;
+    /* Position above menu z-index 1030 */
+    z-index: 2000;
+  }
+
+  .jumbotron p,
+  body > .container p:nth-child(2) {
+    /* Make room for the logo */
+    margin-right: 325px;
+  }
+
+}
