@@ -1,174 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8">
     <title>Deployotron</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="css/bootstrap.css" media="screen">
-    <link rel="stylesheet" href="css/deployotron.css" media="screen">
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="../bower_components/html5shiv/dist/html5shiv.js"></script>
-      <script src="../bower_components/respond/dest/respond.min.js"></script>
-    <![endif]-->
-    <script>
-
-     var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-54809714-1']);
-      _gaq.push(['_trackPageview']);
-
-     (function() {
-       var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-     })();
-
-    </script>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/superhero/bootstrap.min.css" />
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <link href='//fonts.googleapis.com/css?family=Squada+One' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/css/deployotron.css" />
   </head>
-  <body>
-    <div class="navbar navbar-default navbar-fixed-top">
+  <body data-spy="scroll" data-target=".navbar">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
       <div class="container">
         <div class="navbar-header">
-          <a href="../" class="navbar-brand">Deployotron</a>
-          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
+          <a class="navbar-brand" href="#start">Deployotron</a>
         </div>
-        <div class="navbar-collapse collapse" id="navbar-main">
-
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="https://github.com/reload/deployotron">View on GitHub</a></li>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="https://github.com/reload/deployotron">GitHub</a></li>
           </ul>
-
         </div>
+      </div>
+    </nav>
+
+    <div class="jumbotron" id="start">
+      <div class="container">
+        <img src="/images/deployotron.png"/>
+        <h1>Deployotron</h1>
+        <p>Deployments at the speed of Drush.</p>
       </div>
     </div>
 
-    <div class="page-header" id="banner">
-      <div class="row">
-        <div class="container">
-          <div class="col-sm-12">
-            <h1>Deployotron</h1>
-            <p class="lead">Get it out there</p>
-          </div>
-        </div>
+    <div class="container">
+      <div class="asciinema">
+      <script type="text/javascript" src="https://asciinema.org/a/12775.js" id="asciicast-12775" async></script>
       </div>
-    </div>
+      
+      <p class="first">Deployotron makes deployments a one Drush command affair, and is simple to set up:
+        <dl>
+          <dt>Commit your site to Git</dt>
+          <dd>Deployotron expects your site to be committed to the root of your Git repository.</dd>
 
-    <div class="bs-docs-section">
-      <div class="row">
-        <div class="container">
-          <div class="col-sm-12">
-            <div class="bs-component">
-              <!-- <h2>Deploy your Drupal site in five easy steps</h2> -->
-              <p>A deployment tool doesn't have to be complicated to
-                set up. Deployotron can deploy a new site in five steps,
-                and 3 of them you'd be doing anyway:</p>
-            </div>
-          </div>
-        </div>
-      </div>
+          <dt>Install Deployotron</dt>
+          <dd>Copy Deployotron into sites/all/drush and commit it. This ensures that everyone is using the same version when deploying.</dd>
 
-      <div class="row odd">
-        <div class="container">
-          <div class="col-sm-6">
-            <img class="img-responsive" src="images/commit.png" alt="Commit site screenshot" />
-          </div>
-          <div class="col-sm-6">
-            <div class="bs-component">
+          <dt>Fix your alias file</dt>
+          <dd>Aliases makes Drush much more fun to use, and committing an aliases.drushrc.php in sites/all/drush makes it easy to share them with the rest of the team. It's also the place to configure Deployotron.</dd>
 
-              <h3>Commit your site to Git</h3>
-              <p>Deployotron expects your site to be committed to the
-                root of your Git repository.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+          <dt>Clone site to prod</dt>
+          <dd>Clone the site repository where you want to deploy it to, using the same user as setup for the alias, to ensure that the permissions of the files are properly set up.</dd>
 
-      <div class="row">
-        <div class="container">
+          <dt>Enjoy</dt>
+          <dd>From there it's just a matter of pushing your changes and running <code>drush deploy @alias</code> to deploy your changes. </dd>
 
-          <div class="col-sm-6">
-            <div class="bs-component">
-              <h3>Install Deployotron</h3>
-              <p>Copy Deployotron into <code>sites/all/drush</code>
-                and commit it. This ensures that everyone is using the
-                same version when deploying.</p>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <img class="img-responsive" src="images/clone.png" alt="Cloning Deployotron screenshot" />
-          </div>
-        </div>
-      </div>
+          <dt>Oh no...</dt>
+          <dd>Something bad happened? Run drush omg @site to re-import the last dump and checkout the revision the site was at before deploying.</dd>
+        </dl>
 
-      <div class="row odd">
-        <div class="container">
-          <div class="col-sm-6">
-            <img class="img-responsive" src="images/alias.png" alt="Alias screenshot" />
-</div>
-          <div class="col-sm-6">
-            <div class="bs-component">
-              <h3>Fix your alias file</h3>
-              <p>Aliases makes Drush much more fun to use, and
-                committing an <code>aliases.drushrc.php</code>
-                in <code>sites/all/drush</code> makes it easy to share
-                them with the rest of the team. It's also the place to
-                configure Deployotron.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        See <a href="https://github.com/reload/deployotron">GitHub</a> for the code and README.
 
-      <div class="row">
-        <div class="container">
-          <div class="col-sm-6">
-            <div class="bs-component">
-              <h3>Clone site to prod</h3>
-              <p>Clone the site repository where you want to deploy it
-                to, using the same user as setup for the alias, to
-                ensure that the permissions of the files are properly
-                set up.</p>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <img class="img-responsive" src="images/clone2.png" alt="Clone site screenshot" />
-        </div>
-      </div>
-
-      <div class="row odd">
-        <div class="container">
-          <div class="col-sm-12">
-            <div class="bs-component">
-              <h3>PROFIT!!! (aka, deploy)</h3>
-              <p>Running the deploy command will ask you to confirm
-                its actions, before doing it.</p>
-              <img class="img-responsive" src="images/deployment-confirmation.png" alt="Deployotron screenshot" />
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="container">
-          <div class="col-sm-12">
-            <div class="bs-component">
-              <h3>Oh no...</h3>
-              <p>Something bad happened? Run <code>drush omg
-                  @site</code> to re-import the last dump and checkout the
-                revision the site was at before deploying.</p>
-              <img class="img-responsive" src="images/omg.png" alt="Deployotron OMG command screenshot" />
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
   </body>
 </html>
