@@ -74,6 +74,16 @@ code {
   text-align: center;
 }
 
+.reload-logo {
+  width: 125px; 
+  height: 30px;
+  background: url("../images/reload.png");
+  direction: ltr;
+  display: block;
+  text-indent: -9999px;
+  margin: 0 auto 30px;
+}
+
 @media screen and (max-width: 600px) {
   /* Don't show the screencast when there's not enough room for it. */
   .asciinema {
