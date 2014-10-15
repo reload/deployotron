@@ -13,7 +13,7 @@ h1, h2, h3, h4, h5 {
 
 dt {
   font-family: 'Squada One', sans-serif;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: normal;
 }
 
@@ -84,7 +84,6 @@ code {
     height: 150px;
     margin-right: 10px;
   }
-
 }
 
 @media screen and (min-width: 768px) {
@@ -125,5 +124,9 @@ code {
 
   .first {
     padding-top: 20px;
+  }
+
+  dt {
+    font-size: 30px;
   }
 }
