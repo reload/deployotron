@@ -47,7 +47,6 @@ code {
 
   /* Add a lighter blue border to separate jumbotron from content. */
   border-bottom: 1px solid #697683;
-  min-height: 320px;
 }
 
 .jumbotron img {
@@ -94,6 +93,7 @@ code {
     /* Larger screen, larger elements */
     padding: 64px 0 32px;
     border-bottom-width: 2px;
+    min-height: 320px;
   }
 
   .jumbotron .container {
