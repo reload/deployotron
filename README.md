@@ -131,4 +131,4 @@ command to edit a sudoers.d config file:
 And add the following to the file (replacing `deploy_user` with the
 `remote-user` of the alias used for deployment):
 
-    deploy_user          ALL=(root) NOPASSWD: /usr/sbin/service apache2 restart,/usr/sbin/service varnish restart
+    deploy_user          ALL=(root) NOPASSWD: /usr/sbin/service apache2 graceful,/usr/sbin/service varnish restart
