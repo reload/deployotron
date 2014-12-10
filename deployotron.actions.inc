@@ -923,18 +923,13 @@ namespace Deployotron\Actions {
         'description' => 'Override command used to restart Apache2.',
         'example-value' => 'command',
       ),
-      'restart-apache2-graceful' => array(
-        'description' => 'Do a graceful reload rather than a restart.',
-      ),
     );
 
     /**
      * {@inheritdoc}
      */
     public function run($state) {
-      $default_command = 'sudo service apache2 ' . drush_get_option('restart-apache2-graceful', FALSE) ? 'graceful' : 'restart';
-      $command = drush_get_option('restart-apache2-command', $default_command);
-      if (!$this->sh($command)) {
+      if (!$this->sh(drush_get_option('restart-apache2-command', 'sudo service apache2 graceful'))) {
         return drush_set_error(dt('Error restarting apache2.'));
       }
       return TRUE;
