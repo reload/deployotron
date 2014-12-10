@@ -929,7 +929,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function run($state) {
-      if (!$this->sh(drush_get_option('restart-apache2-command', 'sudo service apache2 restart'))) {
+      if (!$this->sh(drush_get_option('restart-apache2-command', 'sudo service apache2 graceful'))) {
         return drush_set_error(dt('Error restarting apache2.'));
       }
       return TRUE;
