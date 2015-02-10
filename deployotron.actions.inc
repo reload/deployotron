@@ -18,7 +18,7 @@ namespace Deployotron {
         'SiteOffline',
         'BackupDatabase',
         'DeployCode',
-        'CreateVersionTxt',
+        'CreateVersionYaml',
         'RestartApache2',
         'UpdateDatabase',
         'RunDrakePostUpdate',
@@ -1084,14 +1084,14 @@ namespace Deployotron\Actions {
   }
 
   /**
-   * Create a VERSION.txt file.
+   * Create a VERSION.yml file.
    */
-  class CreateVersionTxt extends Action {
-    static protected $description = 'Create VERSION.txt.';
-    static protected $runMessage = 'Creating VERSION.txt';
-    static protected $short = 'create VERSION.txt';
-    static protected $killSwitch = 'no-create-version-txt';
-    static protected $versionTxt = NULL;
+  class CreateVersionYaml extends Action {
+    static protected $description = 'Create VERSION.yml.';
+    static protected $runMessage = 'Creating VERSION.yml';
+    static protected $short = 'create VERSION.yml';
+    static protected $killSwitch = 'no-create-version-yml';
+    static protected $versionYaml = NULL;
 
     /**
      * {@inheritdoc}
@@ -1102,30 +1102,30 @@ namespace Deployotron\Actions {
         $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
 
-        $version_txt = array();
-        $version_txt[] = 'Deployment info';
-        $version_txt[] = '---------------';
+        $version_yml = array();
+        $version_yml[] = '# Deployment info';
+        $version_yml[] = '';
         if (!empty($state['requested_branch'])) {
-          $version_txt[] = 'Branch: ' . $state['requested_branch'];
+          $version_yml[] = '- Branch: ' . $state['requested_branch'];
         }
         if (!empty($tags)) {
-          $version_txt[] = 'Tags: ' . $tags;
+          $version_yml[] = '- Tags: ' . $tags;
         }
-        $version_txt[] = 'SHA: ' . $state['deployed_sha'];
-        $version_txt[] = 'Time of deployment: ' . date('r');
-        $version_txt[] = 'Deployer: ' . $_SERVER['USER'] . '@' . php_uname('n');
+        $version_yml[] = '- SHA: ' . $state['deployed_sha'];
+        $version_yml[] = '- Time of deployment: ' . date('r');
+        $version_yml[] = '- Deployer: ' . $_SERVER['USER'] . '@' . php_uname('n');
 
-        // Delete any pre-existing VERSION.txt file and create a new one.
-        $this->sh('rm VERSION.txt');
+        // Delete any pre-existing VERSION.yml file and create a new one.
+        $this->sh('rm VERSION.yml');
         // You'd think that echo would do the job, but it's not consistent
         // across shells. Bash and most /bin/echo requires the -n option to
         // expand \n to a newline, while /bin/sh built-in echo doesn't and
         // prints the -n as part of the output. But printf works the same and is
         // POSIX 7, which should cover our bases.
-        $this->sh('printf ' . escapeshellarg(implode("\\n", $version_txt) . "\\n") . ' > VERSION.txt');
+        $this->sh('printf ' . escapeshellarg(implode("\\n", $version_yml) . "\\n") . ' > VERSION.yml');
       }
       else {
-        drush_log(dt('No version deployed, not creating/updating VERSION.txt.'), 'warning');
+        drush_log(dt('No version deployed, not creating/updating VERSION.yml.'), 'warning');
       }
       return TRUE;
     }

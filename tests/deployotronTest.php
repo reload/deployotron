@@ -210,8 +210,8 @@ class DeployotronCase extends Drush_CommandTestCase {
     $this->assertRegExp('/More than one of branch\\/tag\\/sha specified, using sha./', $this->getOutput());
     $this->assertRegExp('/HEAD now at 04256b5992d8b4a4fae25c7cb7888583749fabc0/', $this->getOutput());
 
-    // Check that VERSION.txt was created.
-    $this->assertFileExists($this->deploySite() . '/VERSION.txt');
+    // Check that VERSION.yml was created.
+    $this->assertFileExists($this->deploySite() . '/VERSION.yml');
 
     // Check that a invalid tag/branch prints the proper error message.
     $this->drush('deploy 2>&1', array('@deployotron'), array(
@@ -260,17 +260,17 @@ class DeployotronCase extends Drush_CommandTestCase {
       ), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at b9471948c3f83a665dd4f106aba3de8962d69b42/', $this->getOutput());
 
-    // VERSION.txt should still exist.
-    $this->assertFileExists($this->deploySite() . '/VERSION.txt');
+    // VERSION.yml should still exist.
+    $this->assertFileExists($this->deploySite() . '/VERSION.yml');
     // Check content.
-    $version_txt = file_get_contents($this->deploySite() . '/VERSION.txt');
-    $this->assertRegExp('/Deployment info/', $version_txt);
-    $this->assertRegExp('/SHA: b9471948c3f83a665dd4f106aba3de8962d69b42/', $version_txt);
-    $this->assertRegExp('/Time of deployment: /', $version_txt);
-    $this->assertRegExp('/Deployer: /', $version_txt);
+    $version_yml = file_get_contents($this->deploySite() . '/VERSION.yml');
+    $this->assertRegExp('/Deployment info/', $version_yml);
+    $this->assertRegExp('/SHA: b9471948c3f83a665dd4f106aba3de8962d69b42/', $version_yml);
+    $this->assertRegExp('/Time of deployment: /', $version_yml);
+    $this->assertRegExp('/Deployer: /', $version_yml);
 
     // Check that the switch for echo didn't got written to the file.
-    $this->assertNotRegExp('/-e/', $version_txt);
+    $this->assertNotRegExp('/-e/', $version_yml);
 
     // Check that a file in the way of a new file will cause the deployment to
     // roll back.
@@ -290,9 +290,9 @@ class DeployotronCase extends Drush_CommandTestCase {
     unlink($this->deploySite() . '/sites/all/modules/coffee');
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
-    $version_txt = file_get_contents($this->deploySite() . '/VERSION.txt');
-    $this->assertRegExp('/Branch: master/', $version_txt);
-    $this->assertRegExp('/SHA: fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $version_txt);
+    $version_yml = file_get_contents($this->deploySite() . '/VERSION.yml');
+    $this->assertRegExp('/Branch: master/', $version_yml);
+    $this->assertRegExp('/SHA: fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $version_yml);
   }
 
   /**
@@ -462,7 +462,7 @@ class DeployotronCase extends Drush_CommandTestCase {
   /**
    * Test no-deploy.
    *
-   * And that Flowdock and VERSION.txt prints the appropriate message.
+   * And that Flowdock and VERSION.yml prints the appropriate message.
    */
   public function testNoDeploy() {
     $this->writeAlias(array(
@@ -480,8 +480,8 @@ class DeployotronCase extends Drush_CommandTestCase {
         'no-deploy' => TRUE,
         'flowdock-token' => $this->flowdockToken,
       ), NULL, $this->webroot());
-    // Check VERSION.txt message.
-    $this->assertRegExp('/No version deployed, not creating\/updating VERSION.txt/', $this->getOutput());
+    // Check VERSION.yml message.
+    $this->assertRegExp('/No version deployed, not creating\/updating VERSION.yml/', $this->getOutput());
 
     // Check Flowdock message.
     $this->assertRegExp('/No version deployed, not sending Flowdock notification/', $this->getOutput());
