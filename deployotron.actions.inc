@@ -20,6 +20,7 @@ namespace Deployotron {
         'DeployCode',
         'CreateVersionTxt',
         'RestartApache2',
+        'FeaturesRevertAll',
         'UpdateDatabase',
         'RunDrakePostUpdate',
         'ClearCache',
