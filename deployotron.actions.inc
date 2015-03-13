@@ -965,10 +965,9 @@ namespace Deployotron\Actions {
   }
 
   /**
-  * Revert all features.
-  */
-  class FeaturesRevertAll extends Action
-  {
+   * Revert all features.
+   */
+  class FeaturesRevertAll extends Action {
     static protected $description = 'Revert all features.';
     static protected $runMessage = 'Reverting all features';
     static protected $enableSwitch = 'fra';
