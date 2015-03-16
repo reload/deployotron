@@ -1198,7 +1198,7 @@ namespace Deployotron\Actions {
           'from_address' => 'deployotron@reload.dk',
           'subject' => $subject,
           'content' => $body,
-          'tags' => array('deployotron', $this->site['#name']),
+          'tags' => array('deployotron', $this->getFlowdockTag()),
         );
         $data = json_encode($data);
 
@@ -1224,6 +1224,13 @@ namespace Deployotron\Actions {
         drush_log(dt('No version deployed, not sending Flowdock notification.'), 'warning');
       }
       return TRUE;
+    }
+
+    /**
+     * Get a Flowdock tag for the site.
+     */
+    private function getFlowdockTag() {
+      return preg_replace('/[^[:alnum:]_\-]/', '_', $this->site['#name']);
     }
   }
 
