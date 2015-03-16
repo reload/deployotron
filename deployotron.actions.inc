@@ -20,6 +20,7 @@ namespace Deployotron {
         'DeployCode',
         'CreateVersionTxt',
         'RestartApache2',
+        'FeaturesRevertAll',
         'UpdateDatabase',
         'RunDrakePostUpdate',
         'ClearCache',
@@ -958,6 +959,37 @@ namespace Deployotron\Actions {
     public function run($state) {
       if (!$this->sh(drush_get_option('restart-varnish-command', 'sudo service varnish restart'))) {
         return drush_set_error(dt('Error restarting varnish.'));
+      }
+      return TRUE;
+    }
+  }
+
+  /**
+   * Revert all features.
+   */
+  class FeaturesRevertAll extends Action {
+    static protected $description = 'Revert all features.';
+    static protected $runMessage = 'Reverting all features';
+    static protected $enableSwitch = 'fra';
+    static protected $short = 'revert all features';
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validate() {
+      // This still prints output unless backend_options is set to FALSE.
+      if (!$this->drush('fra', array(), array('quiet' => TRUE, 'no' => TRUE))) {
+        return FALSE;
+      }
+      return TRUE;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run($state) {
+      if (!$this->drush('fra', array(), array('yes' => TRUE))) {
+        return drush_set_error(dt('Error reverting all features.'));
       }
       return TRUE;
     }
