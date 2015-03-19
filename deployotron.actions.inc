@@ -753,8 +753,8 @@ namespace Deployotron\Actions {
     /**
      * Get the name of a dump.
      */
-    public static function filename($date_str, $sha) {
-      return sprintf("%s/deploy.%s.%s.sql", drush_get_option('dump-dir', '/tmp'), $date_str, $sha);
+    public static function filename($alias, $date_str, $sha) {
+      return sprintf("%s/deploy.%s.%s.%s.sql", drush_get_option('dump-dir', '/tmp'), $alias, $date_str, $sha);
     }
 
     /**
@@ -786,7 +786,7 @@ namespace Deployotron\Actions {
         $date = date('Y-m-d\TH:i:s');
       }
 
-      return static::filename($date, $this->getHead());
+      return static::filename($this->site['#name'], $date, $this->getHead());
     }
   }
 
@@ -873,7 +873,7 @@ namespace Deployotron\Actions {
         // If we're dumping a new dump, we need to keep one less than the max to
         // make room for the new one.
         $keep = $max_dumps - ($dumping ? 1 : 0);
-        $this->sh('ls ' . BackupDatabase::filename('*', '*'));
+        $this->sh('ls ' . BackupDatabase::filename($this->site['#name'], '*', '*'));
         $dumps = $this->shOutputArray();
         if (count($dumps) > $keep) {
           // Reverse sort to get the newest first.
@@ -1055,7 +1055,7 @@ namespace Deployotron\Actions {
      */
     public function validate() {
       // Try to find some dumps and give them as options for restoring.
-      $regex = '{^deploy\.(\d+-\d+-\d+T\d+:\d+:\d+)\.([0-9a-f]+)\.sql$}';
+      $regex = '{^deploy\.' . preg_quote($this->site['#name']) . '\.(\d+-\d+-\d+T\d+:\d+:\d+)\.([0-9a-f]+)\.sql$}';
       $this->sh('ls ' . drush_get_option('dump-dir', '/tmp'));
       $listing = $this->shOutput();
       $dumps = array();
@@ -1069,7 +1069,7 @@ namespace Deployotron\Actions {
         $date = drush_choice($dumps, dt('Please select a dump.'), '!key (!value)');
         if ($date) {
           $sha = $dumps[$date];
-          $file = 'deploy.' . $date . '.' . $sha . '.sql';
+          $file = 'deploy.' . $this->site['#name'] . '.' . $date . '.' . $sha . '.sql';
           // We simply set the options so the other actions will see them. The
           // DeployCode action will check that the SHA is available locally
           // before validating, so we'll avoid the worst if dumps get mixed up.
