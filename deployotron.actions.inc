@@ -408,6 +408,8 @@ namespace Deployotron {
      *   Command arguments.
      * @param string $options
      *   Command arguments.
+     * @param bool $backend_options
+     *   Backend options for drush_invoke_process().
      *
      * @return bool
      *   Whether the command succeeded.
