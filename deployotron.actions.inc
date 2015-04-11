@@ -979,9 +979,8 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function validate() {
-      // This still prints output unless backend_options is set to FALSE.
-      if (!$this->drush('fra', array(), array('quiet' => TRUE, 'no' => TRUE))) {
-        return FALSE;
+      if (!$this->drush('fra', array(), array('quiet' => TRUE, 'no' => TRUE), FALSE)) {
+        return drush_set_error(dt("The drush command 'fra' could not be found."));
       }
       return TRUE;
     }
