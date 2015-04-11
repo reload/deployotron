@@ -414,8 +414,8 @@ namespace Deployotron {
      * @return bool
      *   Whether the command succeeded.
      */
-    protected function drush($command, $args = array(), $options = array()) {
-      $this->drushResult = drush_invoke_process($this->site, $command, $args, $options, TRUE);
+    protected function drush($command, $args = array(), $options = array(), $backend_options = TRUE) {
+      $this->drushResult = drush_invoke_process($this->site, $command, $args, $options, $backend_options);
       if (!$this->drushResult || $this->drushResult['error_status'] != 0) {
         return FALSE;
       }
