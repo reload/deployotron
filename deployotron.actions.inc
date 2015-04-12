@@ -20,6 +20,9 @@ namespace Deployotron {
         'DeployCode',
         'CreateVersionTxt',
         'RestartApache2',
+        'RestartNginx',
+        'ReloadNginx',
+        'RestartPHP5FPM',
         'FeaturesRevertAll',
         'UpdateDatabase',
         'RunDrakePostUpdate',
@@ -932,6 +935,87 @@ namespace Deployotron\Actions {
     public function run($state) {
       if (!$this->sh(drush_get_option('restart-apache2-command', 'sudo service apache2 graceful'))) {
         return drush_set_error(dt('Error restarting apache2.'));
+      }
+      return TRUE;
+    }
+  }
+
+  /**
+   * Restart Nginx.
+   */
+  class RestartNginx extends Action {
+    static protected $description = 'Restart Nginx.';
+    static protected $runMessage = 'Restarting Nginx';
+    static protected $enableSwitch = 'restart-nginx';
+    static protected $killSwitch = 'no-restart-nginx';
+    static protected $short = 'restart nginx';
+    static protected $options = array(
+      'restart-nginx-command' => array(
+        'description' => 'Override command used to restart Nginx.',
+        'example-value' => 'command',
+      ),
+    );
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run($state) {
+      if (!$this->sh(drush_get_option('restart-nginx-command', 'sudo service nginx restart'))) {
+        return drush_set_error(dt('Error restarting nginx.'));
+      }
+      return TRUE;
+    }
+  }
+
+  /**
+   * Reload Nginx.
+   */
+  class ReloadNginx extends Action {
+    static protected $description = 'Reload Nginx.';
+    static protected $runMessage = 'Reloading Nginx';
+    static protected $enableSwitch = 'reload-nginx';
+    static protected $killSwitch = 'no-reload-nginx';
+    static protected $short = 'reload nginx';
+    static protected $options = array(
+      'reload-nginx-command' => array(
+        'description' => 'Override command used to reload Nginx.',
+        'example-value' => 'command',
+      ),
+    );
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run($state) {
+      if (!$this->sh(drush_get_option('reload-nginx-command', 'sudo service nginx reload'))) {
+        return drush_set_error(dt('Error reloading nginx.'));
+      }
+      return TRUE;
+    }
+  }
+
+  /**
+   * Restart PHP5-FPM.
+   */
+  class RestartPHP5FPM extends Action {
+    static protected $description = 'Restart PHP5-FPM.';
+    static protected $runMessage = 'Restarting PHP5-FPM';
+    static protected $enableSwitch = 'restart-php5-fpm';
+    static protected $killSwitch = 'no-restart-php5-fpm';
+    static protected $short = 'restart php5-fpm';
+    static protected $options = array(
+      'restart-php5-fpm-command' => array(
+        'description' => 'Override command used to restart PHP5-FPM.',
+        'example-value' => 'command',
+      ),
+    );
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run($state) {
+      if (!$this->sh(drush_get_option('restart-php5-fpm-command', 'sudo service php5-fpm restart'))) {
+        return drush_set_error(dt('Error restarting php5-fpm.'));
       }
       return TRUE;
     }
