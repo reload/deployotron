@@ -1123,7 +1123,6 @@ namespace Deployotron\Actions {
     static protected $runMessage = 'Creating VERSION.txt';
     static protected $short = 'create VERSION.txt';
     static protected $killSwitch = 'no-create-version-txt';
-    static protected $versionTxt = NULL;
 
     /**
      * {@inheritdoc}
