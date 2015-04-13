@@ -980,7 +980,11 @@ namespace Deployotron\Actions {
      */
     public function validate() {
       if (!$this->drush('fra', array(), array('quiet' => TRUE, 'no' => TRUE), FALSE)) {
-        return drush_set_error(dt("The drush command 'fra' could not be found."));
+        foreach ($this->drushResult['error_log'] as $error) {
+          foreach ($error as $error_type => $message) {
+            drush_set_error($message);
+          }
+        }
       }
       return TRUE;
     }
