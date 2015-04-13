@@ -173,7 +173,7 @@ namespace Deployotron {
         $sub_options = $options;
         $options = array();
         // If the action options defines the enable switch, use it so
-        // description and possible examle-values propergate.
+        // description and possible example-values propergate.
         if (isset($sub_options[$this->enableSwitch])) {
           $options[$this->enableSwitch] = $sub_options[$this->enableSwitch];
           unset($sub_options[$this->enableSwitch]);
