@@ -408,12 +408,14 @@ namespace Deployotron {
      *   Command arguments.
      * @param string $options
      *   Command arguments.
+     * @param bool $backend_options
+     *   Backend options for drush_invoke_process().
      *
      * @return bool
      *   Whether the command succeeded.
      */
-    protected function drush($command, $args = array(), $options = array()) {
-      $this->drushResult = drush_invoke_process($this->site, $command, $args, $options, TRUE);
+    protected function drush($command, $args = array(), $options = array(), $backend_options = TRUE) {
+      $this->drushResult = drush_invoke_process($this->site, $command, $args, $options, $backend_options);
       if (!$this->drushResult || $this->drushResult['error_status'] != 0) {
         return FALSE;
       }
@@ -977,9 +979,12 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function validate() {
-      // This still prints output unless backend_options is set to FALSE.
-      if (!$this->drush('fra', array(), array('quiet' => TRUE, 'no' => TRUE))) {
-        return FALSE;
+      if (!$this->drush('fra', array(), array('quiet' => TRUE, 'no' => TRUE), FALSE)) {
+        foreach ($this->drushResult['error_log'] as $error) {
+          foreach ($error as $error_type => $message) {
+            drush_set_error($message);
+          }
+        }
       }
       return TRUE;
     }
