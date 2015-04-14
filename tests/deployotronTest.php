@@ -460,6 +460,42 @@ class DeployotronCase extends Drush_CommandTestCase {
   }
 
   /**
+   * Test that post commands work.
+   */
+  public function testPostCommand() {
+    $this->writeAlias(array(
+      'branch' => 'master',
+      'post-deploy' => array(
+        // The funky quoting makes it possible to distinguish between the
+        // command being output and the output of the command.
+        'echo "post""-deploy"'
+      ),
+    ));
+
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
+
+    // Check that deployment works.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Confirm message.
+
+    $this->assertRegExp('/Run command: echo "post""-deploy"/', $this->getOutput());
+    // Running message.
+    $this->assertRegExp('/Running command: echo "post""-deploy"/', $this->getOutput());
+    // Output of the command.
+    $this->assertRegExp('/post-deploy/', $this->getOutput());
+
+    // Check that a failing command gets caught.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'post-deploy' => '/bin/false'), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->assertRegExp('/Error running command "\/bin\/false"/', $this->getOutput());
+
+    // @todo pre- commands, drush commands and multiple commands
+    $this->fail();
+  }
+
+  /**
    * Test no-deploy.
    *
    * And that Flowdock and VERSION.txt prints the appropriate message.

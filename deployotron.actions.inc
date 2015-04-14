@@ -46,7 +46,20 @@ namespace Deployotron {
         foreach (static::$actionMapping[$name] as $class_name) {
           $class_name = '\\Deployotron\\Actions\\' . $class_name;
           $action = new $class_name($site);
+          // @todo drush_get_option_list() doesn't play well with commas.
+          if ($commands = drush_get_option_list('pre-' . $action->getSwitchSuffix(), FALSE)) {
+            foreach ($commands as $command) {
+              $actions[] = new Actions\CommandAction($site, $command);
+            }
+          }
+
           $actions[] = $action;
+
+          if ($commands = drush_get_option_list('post-' . $action->getSwitchSuffix(), FALSE)) {
+            foreach ($commands as $command) {
+              $actions[] = new Actions\CommandAction($site, $command);
+            }
+          }
         }
         return $actions;
       }
@@ -169,6 +182,9 @@ namespace Deployotron {
 
       $options += $this->options;
 
+      $options['pre-' . $this->getSwitchSuffix()] = "Commands to run before action.";
+      $options['post-' . $this->getSwitchSuffix()] = "Commands to run after action.";
+
       if (isset($this->enableSwitch)) {
         $sub_options = $options;
         $options = array();
@@ -188,6 +204,21 @@ namespace Deployotron {
       }
 
       return array('options' => $options, 'sub-options' => array());
+    }
+
+    /**
+     * Get the switch suffix for --pre-/--post- switches.
+     */
+    public function getSwitchSuffix() {
+      if (isset($this->enableSwitch)) {
+        return $this->enableSwitch;
+      }
+      elseif (isset($this->killSwitch)) {
+        return preg_replace('/^no-/', '', $this->killSwitch);
+      }
+      else {
+        return preg_replace(array('/[^a-z0-9 ]/', '/ /'), array('', '-'), strtolower($this->short));
+      }
     }
 
     /**
@@ -496,6 +527,29 @@ namespace Deployotron {
  */
 namespace Deployotron\Actions {
   use Deployotron\Action;
+
+  class CommandAction extends Action {
+    public function __construct($site, $command) {
+      $this->description = 'Run command: ' . $command;
+      $this->runMessage = 'Running command: ' . $command;
+      $this->short = 'run ' . $command;
+
+      $this->command = $command;
+      parent::__construct($site);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run($state) {
+      $success = $this->sh($this->command);
+      drush_print($this->shOutput());
+      if (!$success) {
+        return drush_set_error(dt('Error running command "@command"', array('@command' => $this->command)));
+      }
+      return TRUE;
+    }
+  }
 
   /**
    * Sanity check.
