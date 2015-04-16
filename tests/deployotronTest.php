@@ -475,24 +475,72 @@ class DeployotronCase extends Drush_CommandTestCase {
     // Drush 5 needs to be kicked to see the new command.
     $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
 
-    // Check that deployment works.
+    // See if post command works.
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
     $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
 
     // Confirm message.
-
     $this->assertRegExp('/Run command: echo "post""-deploy"/', $this->getOutput());
     // Running message.
     $this->assertRegExp('/Running command: echo "post""-deploy"/', $this->getOutput());
     // Output of the command.
     $this->assertRegExp('/post-deploy/', $this->getOutput());
 
-    // Check that a failing command gets caught.
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'post-deploy' => '/bin/false'), NULL, $this->webroot(), self::EXIT_ERROR);
+    // Check that a failing command gets caught, and pre commands..
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'post-deploy' => '/bin/false', 'pre-deploy' => 'echo "pre""-deploy"'), NULL, $this->webroot(), self::EXIT_ERROR);
+
+    // Confirm message.
+    $this->assertRegExp('/Run command: \/bin\/false/', $this->getOutput());
+    $this->assertRegExp('/Run command: echo "pre""-deploy"/', $this->getOutput());
+    // Running message.
+    $this->assertRegExp('/Running command: echo "pre""-deploy"/', $this->getOutput());
+    // Output of the command.
+    $this->assertRegExp('/pre-deploy/', $this->getOutput());
+
+    // Failure message.
     $this->assertRegExp('/Error running command "\/bin\/false"/', $this->getOutput());
 
-    // @todo pre- commands, drush commands and multiple commands
-    $this->fail();
+    // Multiple commands.
+    $this->writeAlias(array(
+      'branch' => 'master',
+      'post-deploy' => array(
+        'echo "post1""-deploy"',
+        'echo "post2""-deploy"',
+      ),
+    ));
+
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Confirm message.
+    $this->assertRegExp('/Run command: echo "post1""-deploy"/', $this->getOutput());
+    $this->assertRegExp('/Run command: echo "post2""-deploy"/', $this->getOutput());
+    // Running message.
+    $this->assertRegExp('/Running command: echo "post1""-deploy"/', $this->getOutput());
+    $this->assertRegExp('/Running command: echo "post2""-deploy"/', $this->getOutput());
+
+    // Output of the command.
+    $this->assertRegExp('/post2-deploy/', $this->getOutput());
+
+    // Drush commands.
+    $this->writeAlias(array(
+      'branch' => 'master',
+      'post-deploy' => array(
+        'drush php-eval "drush_print(\'post-\' . \'deploy\');"',
+      ),
+    ));
+
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Confirm message.
+    $this->assertRegExp('/Run command: drush php-eval "drush_print\(\'post-\' \. \'deploy\'\);"/', $this->getOutput());
+
+    // Running message.
+    $this->assertRegExp('/Running command: drush php-eval "drush_print\(\'post-\' \. \'deploy\'\);"/', $this->getOutput());
+
+    // Output of the command.
+    $this->assertRegExp('/post-deploy/', $this->getOutput());
   }
 
   /**
