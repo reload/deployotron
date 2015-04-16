@@ -84,9 +84,12 @@ Example configuration:
       ),
     );
 
+As demonstrated, you can add external commands to be run before (pre-)
+or after (post-) the individual actions. All the possible options is
+listed in `drush help deploy` and `drush deployotron-actions`.
+
 In addition to command line options you can add messages to be
 displayed to the deploying user by using the following keys:
-
 
  * `message`: Shown at confirmation and after deployment.
  * `confirm_message`: Shown at confirmation.
