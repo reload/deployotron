@@ -19,14 +19,10 @@ namespace Deployotron {
         'BackupDatabase',
         'DeployCode',
         'CreateVersionTxt',
-        'RestartApache2',
-        'FeaturesRevertAll',
         'UpdateDatabase',
-        'RunDrakePostUpdate',
         'ClearCache',
         'SiteOnline',
         'PurgeDatabaseBackups',
-        'RestartVarnish',
         'FlowdockNotificaton',
         'NewRelicNotificaton',
       ),
@@ -969,91 +965,6 @@ namespace Deployotron\Actions {
   }
 
   /**
-   * Restart Apache2.
-   */
-  class RestartApache2 extends Action {
-    protected $description = 'Restart Apache2.';
-    protected $runMessage = 'Restarting Apache2';
-    protected $enableSwitch = 'restart-apache2';
-    protected $killSwitch = 'no-restart-apache2';
-    protected $short = 'restart apache2';
-    protected $options = array(
-      'restart-apache2-command' => array(
-        'description' => 'Override command used to restart Apache2.',
-        'example-value' => 'command',
-      ),
-    );
-
-    /**
-     * {@inheritdoc}
-     */
-    public function run($state) {
-      if (!$this->sh(drush_get_option('restart-apache2-command', 'sudo service apache2 graceful'))) {
-        return drush_set_error(dt('Error restarting apache2.'));
-      }
-      return TRUE;
-    }
-  }
-
-  /**
-   * Restart Varnish.
-   */
-  class RestartVarnish extends Action {
-    protected $description = 'Restart Varnish.';
-    protected $runMessage = 'Restarting Varnish';
-    protected $enableSwitch = 'restart-varnish';
-    protected $killSwitch = 'no-restart-varnish';
-    protected $short = 'restart varnish';
-    protected $options = array(
-      'restart-varnish-command' => array(
-        'description' => 'Override command used to restart Varnish.',
-        'example-value' => 'path',
-      ),
-    );
-
-    /**
-     * {@inheritdoc}
-     */
-    public function run($state) {
-      if (!$this->sh(drush_get_option('restart-varnish-command', 'sudo service varnish restart'))) {
-        return drush_set_error(dt('Error restarting varnish.'));
-      }
-      return TRUE;
-    }
-  }
-
-  /**
-   * Revert all features.
-   */
-  class FeaturesRevertAll extends Action {
-    protected $description = 'Revert all features.';
-    protected $runMessage = 'Reverting all features';
-    protected $enableSwitch = 'fra';
-    protected $short = 'revert all features';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function validate() {
-      // This still prints output unless backend_options is set to FALSE.
-      if (!$this->drush('fra', array(), array('quiet' => TRUE, 'no' => TRUE))) {
-        return FALSE;
-      }
-      return TRUE;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function run($state) {
-      if (!$this->drush('fra', array(), array('yes' => TRUE))) {
-        return drush_set_error(dt('Error reverting all features.'));
-      }
-      return TRUE;
-    }
-  }
-
-  /**
    * Update database.
    */
   class UpdateDatabase extends Action {
@@ -1149,26 +1060,6 @@ namespace Deployotron\Actions {
      */
     public function run($state) {
       // Doing nothing.
-      return TRUE;
-    }
-  }
-
-  /**
-   * Run Drake.
-   */
-  class RunDrakePostUpdate extends Action {
-    protected $description = 'Run drake post-update.';
-    protected $runMessage = 'Running drake post-update';
-    protected $short = 'run drake post-update';
-    protected $enableSwitch = 'drake-post-update';
-
-    /**
-     * {@inheritdoc}
-     */
-    public function run($state) {
-      if (!$this->drush('drake', array('post-update'), array('no-task-ok' => TRUE))) {
-        return drush_set_error(dt('Error runninng drake.'));
-      }
       return TRUE;
     }
   }

@@ -430,36 +430,6 @@ class DeployotronCase extends Drush_CommandTestCase {
   }
 
   /**
-   * Test that overriding Apache2 and Varnish commands work.
-   *
-   * Tests the actions as a side-effect.
-   */
-  public function testCommandOverride() {
-    $this->writeAlias(array(
-        'branch' => 'master',
-        'restart-apache2' => TRUE,
-        'restart-apache2-command' => '/bin/true',
-        'restart-varnish' => TRUE,
-        'restart-varnish-command' => '/bin/true',
-      ));
-
-    // Drush 5 needs to be kicked to see the new command.
-    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
-
-    // Check that deployment works.
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
-    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
-
-    // Check that failing Apache2 restart command gets caught.
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'restart-apache2-command' => '/bin/false'), NULL, $this->webroot(), self::EXIT_ERROR);
-    $this->assertRegExp('/Error restarting apache2/', $this->getOutput());
-
-    // Check that failing Varnish restart command gets caught.
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'restart-varnish-command' => '/bin/false'), NULL, $this->webroot(), self::EXIT_ERROR);
-    $this->assertRegExp('/Error restarting varnish/', $this->getOutput());
-  }
-
-  /**
    * Test that post commands work.
    */
   public function testPostCommand() {
