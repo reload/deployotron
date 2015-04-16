@@ -212,7 +212,10 @@ namespace Deployotron {
      * Get the switch suffix for --pre-/--post- switches.
      */
     public function getSwitchSuffix() {
-      if (isset($this->enableSwitch)) {
+      if (isset($this->switchSuffix)) {
+        return $this->switchSuffix;
+      }
+      elseif (isset($this->enableSwitch)) {
         return $this->enableSwitch;
       }
       elseif (isset($this->killSwitch)) {
@@ -772,6 +775,7 @@ namespace Deployotron\Actions {
     protected $runMessage = 'Setting site online';
     protected $killSwitch = 'no-offline';
     protected $short = 'set site online';
+    protected $switchSuffix = 'online';
 
     /**
      * {@inheritdoc}
@@ -911,6 +915,7 @@ namespace Deployotron\Actions {
         'example-value' => '5',
       ),
     );
+    protected $switchSuffix = 'purge';
 
     /**
      * Dumps to delete;
@@ -1022,6 +1027,7 @@ namespace Deployotron\Actions {
         'example-value' => 'path',
       ),
     );
+    protected $switchSuffix = 'prepare';
 
     /**
      * {@inheritdoc}
@@ -1076,6 +1082,7 @@ namespace Deployotron\Actions {
     protected $runMessage = 'Creating VERSION.txt';
     protected $short = 'create VERSION.txt';
     protected $killSwitch = 'no-create-version-txt';
+    protected $switchSuffix = 'version-txt';
 
     /**
      * {@inheritdoc}
@@ -1129,6 +1136,7 @@ namespace Deployotron\Actions {
         'example-value' => 'token',
       ),
     );
+    protected $switchSuffix = 'flowdock';
 
     /**
      * {@inheritdoc}
@@ -1208,6 +1216,7 @@ namespace Deployotron\Actions {
         'example-value' => 'key',
       ),
     );
+    protected $switchSuffix = 'newrelic';
 
     /**
      * {@inheritdoc}
