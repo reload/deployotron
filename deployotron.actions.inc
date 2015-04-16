@@ -178,8 +178,12 @@ namespace Deployotron {
 
       $options += $this->options;
 
-      $prest_options['pre-' . $this->getSwitchSuffix()] = "Before " . $this->short. ".";
-      $prest_options['post-' . $this->getSwitchSuffix()] = "After " . $this->short. ".";
+      $prest_options = array(
+        'pre/post-*' => array(
+          'pre-' . $this->getSwitchSuffix() => "Before " . $this->short. ".",
+          'post-' . $this->getSwitchSuffix() => "After " . $this->short. ".",
+        ),
+      );
 
       if (isset($this->enableSwitch)) {
         $sub_options = $options;
@@ -196,12 +200,12 @@ namespace Deployotron {
         $options['pre/post-*'] = "Commands to run before/after action.";
         return array(
           'options' => $options,
-          'sub-options' => !empty($sub_options) ? array($this->enableSwitch => $sub_options, 'pre/post-*' => $prest_options) : array(),
+          'sub-options' => (!empty($sub_options) ? array($this->enableSwitch => $sub_options) : array()) + $prest_options,
         );
       }
 
       $options['pre/post-*'] = "Commands to run before/after action.";
-      return array('options' => $options, 'sub-options' => array('pre/post-*' => $prest_options));
+      return array('options' => $options, 'sub-options' => $prest_options);
     }
 
     /**
