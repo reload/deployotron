@@ -43,17 +43,21 @@ namespace Deployotron {
           $class_name = '\\Deployotron\\Actions\\' . $class_name;
           $action = new $class_name($site);
           // @todo drush_get_option_list() doesn't play well with commas.
-          if ($commands = drush_get_option_list('pre-' . $action->getSwitchSuffix(), FALSE)) {
-            foreach ($commands as $command) {
-              $actions[] = new Actions\CommandAction($site, $command);
+          if ($action->enabled()) {
+            if ($commands = drush_get_option_list('pre-' . $action->getSwitchSuffix(), FALSE)) {
+              foreach ($commands as $command) {
+                $actions[] = new Actions\CommandAction($site, $command);
+              }
             }
           }
 
           $actions[] = $action;
 
-          if ($commands = drush_get_option_list('post-' . $action->getSwitchSuffix(), FALSE)) {
-            foreach ($commands as $command) {
-              $actions[] = new Actions\CommandAction($site, $command);
+          if ($action->enabled()) {
+            if ($commands = drush_get_option_list('post-' . $action->getSwitchSuffix(), FALSE)) {
+              foreach ($commands as $command) {
+                $actions[] = new Actions\CommandAction($site, $command);
+              }
             }
           }
         }
