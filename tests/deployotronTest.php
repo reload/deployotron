@@ -432,7 +432,7 @@ class DeployotronCase extends Drush_CommandTestCase {
   /**
    * Test that post commands work.
    */
-  public function testPostCommand() {
+  public function testPrePostCommand() {
     $this->writeAlias(array(
       'branch' => 'master',
       'post-deploy' => array(
@@ -511,6 +511,41 @@ class DeployotronCase extends Drush_CommandTestCase {
 
     // Output of the command.
     $this->assertRegExp('/post-deploy/', $this->getOutput());
+
+    // Don't run pre/post for killSwitched commands..
+    $this->writeAlias(array(
+      'branch' => 'master',
+      'post-updb' => array(
+        'drush php-eval "drush_print(\'post-\' . \'updb\');"',
+      ),
+    ));
+
+    // First double check that it's run per default.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Confirm message.
+    $this->assertRegExp('/Run command: drush php-eval "drush_print\(\'post-\' \. \'updb\'\);"/', $this->getOutput());
+
+    // Running message.
+    $this->assertRegExp('/Running command: drush php-eval "drush_print\(\'post-\' \. \'updb\'\);"/', $this->getOutput());
+
+    // Output of the command.
+    $this->assertRegExp('/post-updb/', $this->getOutput());
+
+    // Now check that it's not run when the action is not run.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'no-updb' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Confirm message.
+    $this->assertNotRegExp('/Run command: drush php-eval "drush_print\(\'post-\' \. \'updb\'\);"/', $this->getOutput());
+
+    // Running message.
+    $this->assertNotRegExp('/Running command: drush php-eval "drush_print\(\'post-\' \. \'updb\'\);"/', $this->getOutput());
+
+    // Output of the command.
+    $this->assertNotRegExp('/post-updb/', $this->getOutput());
+
   }
 
   /**
