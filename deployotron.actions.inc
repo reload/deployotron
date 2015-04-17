@@ -146,6 +146,21 @@ namespace Deployotron {
     static protected $headShas = array();
 
     /**
+     * Construct a new Action object.
+     */
+    public function __construct($site) {
+      $this->site = $site;
+
+      if ($this->short == "incompletely implemented") {
+        drush_log(dt('Incomplete action, missing short description: @action', array('@action' => get_class($this))), 'warning');
+      }
+
+      if (!isset($this->runMessage)) {
+        $this->runMessage = 'Running ' . $this->short;
+      }
+    }
+
+    /**
      * Get help description.
      */
     public function getHelp() {
@@ -223,21 +238,6 @@ namespace Deployotron {
       }
       else {
         return preg_replace(array('/[^a-z0-9 ]/', '/ /'), array('', '-'), strtolower($this->short));
-      }
-    }
-
-    /**
-     * Construct a new Action object.
-     */
-    public function __construct($site) {
-      $this->site = $site;
-
-      if ($this->short == "incompletely implemented") {
-        drush_log(dt('Incomplete action, missing short description: @action', array('@action' => get_class($this))), 'warning');
-      }
-
-      if (!isset($this->runMessage)) {
-        $this->runMessage = 'Running ' . $this->short;
       }
     }
 
