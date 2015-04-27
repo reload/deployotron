@@ -66,10 +66,6 @@ To run the deployment, use a command like:
 To get a listing of all supported command line options, do a `drush
 help deploy`.
 
-In order to be able to restart Apache2/Varnish, sudo needs to be set
-up to allow the deploying user to restart the services. See "Sudo
-setup" for details.
-
 Example configuration:
 
     $aliases['staging'] = array(
@@ -81,13 +77,19 @@ Example configuration:
         'branch' => 'develop',
         'dump-dir' => '/backups', // Defaults to /tmp.
         'num-dumps' => 3, // Defaults to 5. 0 for unlimited.
-        'restart-apache2' => TRUE, // Defaults to FALSE.
+        'post-deploy' => array(
+          'sudo apache2 graceful',
+          'drush -y fra',
+        ),
       ),
     );
 
+As demonstrated, you can add external commands to be run before (pre-)
+or after (post-) the individual actions. All the possible options is
+listed in `drush help deploy` and `drush deployotron-actions`.
+
 In addition to command line options you can add messages to be
 displayed to the deploying user by using the following keys:
-
 
  * `message`: Shown at confirmation and after deployment.
  * `confirm_message`: Shown at confirmation.
@@ -122,13 +124,17 @@ commands uses which actions, and the options of all actions.
 Sudo setup
 ==========
 
-To give the deploying user (`remote-user` in the alias) permission to
-restart apache2/varnish, you need to configure sudo. Use the following
-command to edit a sudoers.d config file:
+To run sudo commands in pre/post hooks, you need to configure sudo to
+allow the command without a password.
+
+Run:
 
     sudo visudo -f /etc/sudoers.d/deployotron
 
-And add the following to the file (replacing `deploy_user` with the
-`remote-user` of the alias used for deployment):
+And add something like following to the file (replacing `deploy_user`
+with the `remote-user` of the alias used for deployment):
 
     deploy_user          ALL=(root) NOPASSWD: /usr/sbin/service apache2 graceful,/usr/sbin/service varnish restart
+
+This allows deployotron to run "sudo service apache2 graceful" and
+"sudo service varnish restart".

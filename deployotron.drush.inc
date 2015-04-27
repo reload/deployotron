@@ -31,7 +31,12 @@ function deployotron_drush_command() {
   foreach (ActionFactory::getActions('deploy') as $action) {
     if ($options = $action->getOptions()) {
       $items['deploy']['options'] += $options['options'];
-      $items['deploy']['sub-options'] += $options['sub-options'];
+      foreach ($options['sub-options'] as $sub => $sub_options) {
+        if (!isset($items['deploy']['sub-options'][$sub])) {
+          $items['deploy']['sub-options'][$sub] = array();
+        }
+        $items['deploy']['sub-options'][$sub] += $sub_options;
+      }
     }
   }
 
@@ -54,7 +59,12 @@ function deployotron_drush_command() {
   foreach (ActionFactory::getActions('omg') as $action) {
     if ($options = $action->getOptions()) {
       $items['oh-my-god']['options'] += $options['options'];
-      $items['oh-my-god']['sub-options'] += $options['sub-options'];
+      foreach ($options['sub-options'] as $sub => $sub_options) {
+        if (!isset($items['oh-my-god']['sub-options'][$sub])) {
+          $items['oh-my-god']['sub-options'][$sub] = array();
+        }
+        $items['oh-my-god']['sub-options'][$sub] += $sub_options;
+      }
     }
   }
 
