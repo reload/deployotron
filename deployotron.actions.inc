@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Actions for Deployotron!
+ * Actions for Deployotron.
  */
 
 namespace Deployotron {
@@ -11,6 +11,9 @@ namespace Deployotron {
   define('COLOR_GREEN', "\033[1;32;40m\033[1m");
   define('COLOR_RESET', "\033[0m");
 
+  /**
+   * Creates actions to run.
+   */
   class ActionFactory {
     static protected $actionMapping = array(
       'deploy' => array(
@@ -199,8 +202,8 @@ namespace Deployotron {
 
       $prest_options = array(
         'pre/post-*' => array(
-          'pre-' . $this->getSwitchSuffix() => "Before " . $this->short. ".",
-          'post-' . $this->getSwitchSuffix() => "After " . $this->short. ".",
+          'pre-' . $this->getSwitchSuffix() => "Before " . $this->short . ".",
+          'post-' . $this->getSwitchSuffix() => "After " . $this->short . ".",
         ),
       );
 
@@ -309,7 +312,7 @@ namespace Deployotron {
      * @return bool
      *   Success or failure.
      */
-    public function run($state) {
+    public function run(array $state) {
       return FALSE;
     }
 
@@ -537,7 +540,15 @@ namespace Deployotron {
 namespace Deployotron\Actions {
   use Deployotron\Action;
 
+  /**
+   * Generic command action.
+   *
+   * Automatically instantiated from pre/post-* options.
+   */
   class CommandAction extends Action {
+    /**
+     * Create action.
+     */
     public function __construct($site, $command) {
       $this->description = 'Run command: ' . $command;
       $this->runMessage = 'Running command: ' . $command;
@@ -910,6 +921,9 @@ namespace Deployotron\Actions {
     }
   }
 
+  /**
+   * Purge old backups.
+   */
   class PurgeDatabaseBackups extends Action {
     protected $runMessage = 'Purging old database dumps.';
     protected $short = 'purge old dumps';
@@ -922,7 +936,7 @@ namespace Deployotron\Actions {
     protected $switchSuffix = 'purge';
 
     /**
-     * Dumps to delete;
+     * Dumps to delete.
      */
     protected $deleteDumps = array();
 

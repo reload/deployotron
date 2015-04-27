@@ -181,7 +181,8 @@ class DeployotronCase extends Drush_CommandTestCase {
 
     // Bad alias error.
     $this->drush('deploy 2>&1', array('@badalias'), array(
-        'y' => TRUE, 'branch' => '',
+        'y' => TRUE,
+        'branch' => '',
         'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0',
       ), NULL, $this->webroot(), self::EXIT_ERROR);
     $this->assertRegExp('/Invalid alias/', $this->getOutput());
@@ -438,7 +439,7 @@ class DeployotronCase extends Drush_CommandTestCase {
       'post-deploy' => array(
         // The funky quoting makes it possible to distinguish between the
         // command being output and the output of the command.
-        'echo "post""-deploy"'
+        'echo "post""-deploy"',
       ),
     ));
 
@@ -457,7 +458,11 @@ class DeployotronCase extends Drush_CommandTestCase {
     $this->assertRegExp('/post-deploy/', $this->getOutput());
 
     // Check that a failing command gets caught, and pre commands..
-    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'post-deploy' => '/bin/false', 'pre-deploy' => 'echo "pre""-deploy"'), NULL, $this->webroot(), self::EXIT_ERROR);
+    $this->drush('deploy 2>&1', array('@deployotron'), array(
+        'y' => TRUE,
+        'post-deploy' => '/bin/false',
+        'pre-deploy' => 'echo "pre""-deploy"',
+      ), NULL, $this->webroot(), self::EXIT_ERROR);
 
     // Confirm message.
     $this->assertRegExp('/Run command: \/bin\/false/', $this->getOutput());
