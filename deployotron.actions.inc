@@ -561,7 +561,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       $success = $this->sh($this->command);
       drush_print($this->shOutput());
       if (!$success) {
@@ -597,7 +597,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (drush_get_option('insanity', FALSE)) {
         drush_log(dt('Skipping sanity check of deployed repo.'), 'warning');
         return TRUE;
@@ -704,7 +704,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       // Some useful information for other actions.
       $state['requested_branch'] = drush_get_option('branch', NULL);
       $state['requested_tag'] = drush_get_option('tag', NULL);
@@ -765,7 +765,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!$this->drush('variable-set', array('maintainance_mode', 1))) {
         return drush_set_error(dt('Error setting site offline.'));
       }
@@ -795,7 +795,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!$this->drush('variable-set', array('maintainance_mode', 0))) {
         return drush_set_error(dt('Error setting site online.'));
       }
@@ -844,7 +844,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!$this->drush('sql-dump', array(), array('no-ordered-dump' => TRUE, 'result-file' => $this->dumpFilename()))) {
         return drush_set_error('Error dumping database.');
       }
@@ -901,7 +901,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!$this->drush('sql-connect', array(), array('pipe' => TRUE))) {
         return drush_set_error('Error getting database connection setup.');
       }
@@ -980,7 +980,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (count($this->deleteDumps)) {
         $this->sh('rm ' . implode(" ", array_map('drush_escapeshellarg', $this->deleteDumps)));
       }
@@ -1003,7 +1003,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!$this->drush('updb', array(), array('yes' => TRUE))) {
         return drush_set_error(dt('Error running database updates.'));
       }
@@ -1023,7 +1023,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!$this->drush('cc', array('all'), array())) {
         return drush_set_error(dt('Error clearing cache.'));
       }
@@ -1086,7 +1086,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       // Doing nothing.
       return TRUE;
     }
@@ -1105,7 +1105,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!empty($state['deployed_sha'])) {
         // Ask git which tags points to this commit.
         $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
@@ -1159,7 +1159,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!empty($state['deployed_sha'])) {
         $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
@@ -1250,7 +1250,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run($state) {
+    public function run(array $state) {
       if (!empty($state['deployed_sha'])) {
         $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
