@@ -1,0 +1,6 @@
+2.x-dev
+-------
+
+- Fixed: #35 Use rev-list instead of rev-parse to also handle
+  annotated tags.
+- Started CHANGELOG.
