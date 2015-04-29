@@ -1,5 +1,5 @@
-2.x-dev
--------
+2.0.1
+-----
 
 - Fixed: #35 Use rev-list instead of rev-parse to also handle
   annotated tags.
