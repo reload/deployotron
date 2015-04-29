@@ -655,4 +655,25 @@ class DeployotronCase extends Drush_CommandTestCase {
     array_unshift($expected_dumps, $dumps[0]);
     $this->assertEquals($expected_dumps, $dumps);
   }
+
+  /**
+   * Check that annotated tags work.
+   */
+  public function testAnnotatedTags() {
+    // Drush 5 needs to be kicked to see the new command.
+    $this->drush('cc', array('drush'), array(), NULL, $this->webroot());
+
+    $this->writeAlias(array(
+        'tag' => 'annotated-tag',
+      ));
+
+    // Check that deployment of annotated tags works.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Check that VERSION.txt was created.
+    $this->assertFileExists($this->deploySite() . '/VERSION.txt');
+    $version_txt = file_get_contents($this->deploySite() . '/VERSION.txt');
+    $this->assertRegExp('/Tags: annotated-tag/', $version_txt);
+  }
 }

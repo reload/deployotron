@@ -491,9 +491,11 @@ namespace Deployotron {
         return drush_set_error(dt('You must provide at least one of --branch, --tag or --sha.'));
       }
 
-      // Even if we already have a SHA, we let it through rev-parse. Easy way to
-      // check for existence and get it normalized to a full SHA.
-      if ($this->shLocal('git rev-parse ' . end($posibilities))) {
+      // Use rev-list to ensure we get a full SHA rather than branch/tag/partial
+      // SHA. Ensures the existence of the branch/tag/SHA, and transforms
+      // annotated tag SHAs to the commit they're based on (so the repo will
+      // actually have the SHA we asked for checked out).
+      if ($this->shLocal('git rev-list -1 ' . end($posibilities) . ' --')) {
         $sha = trim($this->shOutput());
       }
       else {
