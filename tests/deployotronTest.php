@@ -270,9 +270,6 @@ class DeployotronCase extends Drush_CommandTestCase {
     $this->assertRegExp('/Time of deployment: /', $version_txt);
     $this->assertRegExp('/Deployer: /', $version_txt);
 
-    // Check that the switch for echo didn't got written to the file.
-    $this->assertNotRegExp('/-e/', $version_txt);
-
     // Check that a file in the way of a new file will cause the deployment to
     // roll back.
     file_put_contents($this->deploySite() . '/sites/all/modules/coffee', 'stuff');
