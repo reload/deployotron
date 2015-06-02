@@ -626,9 +626,9 @@ namespace Deployotron\Actions {
       }
 
       // Check that we can see the sha we want to deploy.
-      if (!$this->sh('git show -q ' . $this->sha . ' --')) {
+      if (!$this->sh('git log -1 ' . $this->sha . ' --')) {
         $message = $this->shOutput();
-        if (preg_match('/^fatal: bad revision/', $message)) {
+        if (preg_match('/^fatal: bad object/', $message)) {
           return drush_set_error(dt('Could not find SHA, did you forget to push?'));
         }
         drush_print($message);
