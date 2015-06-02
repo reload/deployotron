@@ -474,11 +474,12 @@ namespace Deployotron {
      *   The SHA to deploy.
      */
     protected function pickSha($options = array()) {
-      $options += array(
-        'branch' => NULL,
-        'tag' => NULL,
-        'sha' => NULL,
+      $options = array(
+        'branch' => drush_get_option('branch', NULL),
+        'tag' => drush_get_option('tag', NULL),
+        'sha' => drush_get_option('sha', NULL),
       );
+
       $branch = $options['branch'];
       $tag = $options['tag'];
       $sha = $options['sha'];
@@ -581,6 +582,7 @@ namespace Deployotron\Actions {
   class SanityCheck extends Action {
     protected $runMessage = 'Sanity checking';
     protected $short = 'sanity check';
+    protected $help = 'Fetches the new code and checks that the repository is clean.';
     protected $options = array(
       'insanity' => "Don't check that the server repository is clean. Might cause data loss.",
     );
@@ -599,7 +601,40 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
+    public function validate() {
+      if ($this->sha = $this->pickSha()) {
+        return TRUE;
+      }
+      return FALSE;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function run(array $state) {
+      // Fetch the latest changes from upstream.
+      if (!$this->sh('git fetch')) {
+        $message = $this->shOutput();
+        if (preg_match('/Permission denied \(publickey\)/', $message)) {
+          drush_log(dt('Access denied to repository URL.'), 'error');
+          drush_log(dt('Ensure that either that the user on the server has access to the repository, or use "ForwardAgent yes" in .ssh/config.'), 'error');
+        }
+        else {
+          drush_print($message);
+        }
+        return drush_set_error(dt("Could not fetch from remote repository."));
+      }
+
+      // Check that we can see the sha we want to deploy.
+      if (!$this->sh('git show -q ' . $this->sha . ' --')) {
+        $message = $this->shOutput();
+        if (preg_match('/^fatal: bad revision/', $message)) {
+          return drush_set_error(dt('Could not find SHA, did you forget to push?'));
+        }
+        drush_print($message);
+        return drush_set_error(dt('Could not find SHA remotely.'));
+      }
+
       if (drush_get_option('insanity', FALSE)) {
         drush_log(dt('Skipping sanity check of deployed repo.'), 'warning');
         return TRUE;
@@ -692,12 +727,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function validate() {
-      $options = array(
-        'branch' => drush_get_option('branch', NULL),
-        'tag' => drush_get_option('tag', NULL),
-        'sha' => drush_get_option('sha', NULL),
-      );
-      if ($this->sha = $this->pickSha($options)) {
+      if ($this->sha = $this->pickSha()) {
         return TRUE;
       }
       return FALSE;
@@ -712,26 +742,8 @@ namespace Deployotron\Actions {
       $state['requested_tag'] = drush_get_option('tag', NULL);
       $state['requested_sha'] = drush_get_option('sha', NULL);
 
-      if (!$this->sh('git fetch')) {
-        $message = $this->shOutput();
-        if (preg_match('/Permission denied \(publickey\)/', $message)) {
-          drush_log(dt('Access denied to repository URL.'), 'error');
-          drush_log(dt('Ensure that either that the user on the server has access to the repository, or use "ForwardAgent yes" in .ssh/config.'), 'error');
-        }
-        else {
-          drush_print($message);
-        }
-        return drush_set_error(dt("Could not fetch from remote repository."));
-      }
-
       if (!$this->sh('git checkout ' . $this->sha)) {
-        $message = $this->shOutput();
-        if (preg_match('/^fatal: reference is not a tree/', $message)) {
-          drush_log(dt('Could not find SHA, did you forget to push?'), 'error');
-        }
-        else {
-          drush_print($message);
-        }
+        drush_print($this->shOutput());
         return drush_set_error(dt('Could not checkout code.'));
       }
 
