@@ -580,7 +580,7 @@ namespace Deployotron\Actions {
    * Check for locally modified files and do a dry-run checkout.
    */
   class SanityCheck extends Action {
-    protected $runMessage = 'Sanity checking';
+    protected $runMessage = 'Fetching and sanity checking';
     protected $short = 'sanity check';
     protected $help = 'Fetches the new code and checks that the repository is clean.';
     protected $options = array(
@@ -595,7 +595,7 @@ namespace Deployotron\Actions {
         return COLOR_YELLOW . dt('Skipping sanity check of deployed repo. Might cause data loss or Git failures.') . COLOR_RESET;
       }
 
-      return dt('Check that the deployed git repository is clean.');
+      return dt('Run git fetch and check that the deployed git repository is clean.');
     }
 
     /**
@@ -712,7 +712,7 @@ namespace Deployotron\Actions {
         $stat = array_merge(array_slice($stat, 0, 8), array('', ' ...', ''), array_slice($stat, -8));
       }
 
-      $desc = dt("Run git fetch and check out @sha:\n", array('@sha' => $this->sha));
+      $desc = dt("Check out @sha:\n", array('@sha' => $this->sha));
       $desc .= $commit_info . "\n\n";
 
       $desc .= dt("Currently deployed: @sha\n", array('@sha' => $head));
