@@ -548,6 +548,18 @@ class DeployotronCase extends Drush_CommandTestCase {
     // Output of the command.
     $this->assertNotRegExp('/post-updb/', $this->getOutput());
 
+    // Check that it's not run when explicitly disabled.
+    $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE, 'no-post-updb' => TRUE), NULL, $this->webroot());
+    $this->assertRegExp('/HEAD now at fbcaa29d45716edcbedc3c325bfbab828f1ce838/', $this->getOutput());
+
+    // Confirm message.
+    $this->assertNotRegExp('/Run command: drush php-eval "drush_print\(\'post-\' \. \'updb\'\);"/', $this->getOutput());
+
+    // Running message.
+    $this->assertNotRegExp('/Running command: drush php-eval "drush_print\(\'post-\' \. \'updb\'\);"/', $this->getOutput());
+
+    // Output of the command.
+    $this->assertNotRegExp('/post-updb/', $this->getOutput());
   }
 
   /**

@@ -59,9 +59,10 @@ namespace Deployotron {
      */
     static protected function getActionCommands($type, $action, $site) {
       $actions = array();
-      if ($action->enabled()) {
+      $switch = $type . '-' . $action->getSwitchSuffix();
+      if ($action->enabled() && !drush_get_option('no-' . $switch, FALSE)) {
         // @todo drush_get_option_list() doesn't play well with commas.
-        if ($commands = drush_get_option_list($type . '-' . $action->getSwitchSuffix(), FALSE)) {
+        if ($commands = drush_get_option_list($switch, FALSE)) {
           foreach ($commands as $command) {
             $actions[] = new Actions\CommandAction($site, $command);
           }
