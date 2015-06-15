@@ -45,27 +45,30 @@ namespace Deployotron {
         foreach (static::$actionMapping[$name] as $class_name) {
           $class_name = '\\Deployotron\\Actions\\' . $class_name;
           $action = new $class_name($site);
-          // @todo drush_get_option_list() doesn't play well with commas.
-          if ($action->enabled()) {
-            if ($commands = drush_get_option_list('pre-' . $action->getSwitchSuffix(), FALSE)) {
-              foreach ($commands as $command) {
-                $actions[] = new Actions\CommandAction($site, $command);
-              }
-            }
-          }
-
-          $actions[] = $action;
-
-          if ($action->enabled()) {
-            if ($commands = drush_get_option_list('post-' . $action->getSwitchSuffix(), FALSE)) {
-              foreach ($commands as $command) {
-                $actions[] = new Actions\CommandAction($site, $command);
-              }
-            }
-          }
+          $actions = array_merge($actions,
+                                 static::getActionCommands('pre', $action, $site),
+                                 array($action),
+                                 static::getActionCommands('post', $action, $site));
         }
         return $actions;
       }
+    }
+
+    /**
+     * Gets pre/post commands for an action.
+     */
+    static protected function getActionCommands($type, $action, $site) {
+      $actions = array();
+      if ($action->enabled()) {
+        // @todo drush_get_option_list() doesn't play well with commas.
+        if ($commands = drush_get_option_list($type . '-' . $action->getSwitchSuffix(), FALSE)) {
+          foreach ($commands as $command) {
+            $actions[] = new Actions\CommandAction($site, $command);
+          }
+        }
+      }
+
+      return $actions;
     }
 
     /**
