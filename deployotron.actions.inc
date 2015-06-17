@@ -64,7 +64,9 @@ namespace Deployotron {
         // @todo drush_get_option_list() doesn't play well with commas.
         if ($commands = drush_get_option_list($switch, FALSE)) {
           foreach ($commands as $command) {
-            $actions[] = new Actions\CommandAction($site, $command);
+            if (!empty($command)) {
+              $actions[] = new Actions\CommandAction($site, $command);
+            }
           }
         }
       }
