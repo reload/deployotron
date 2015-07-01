@@ -33,6 +33,7 @@ namespace Deployotron {
         'SiteOffline',
         'OMGPrepare',
         'DeployCode',
+        'CreateVersionTxt',
         'RestoreDatabase',
       ),
     );
