@@ -35,6 +35,7 @@ namespace Deployotron {
         'DeployCode',
         'CreateVersionTxt',
         'RestoreDatabase',
+        'SiteOnline',
       ),
     );
 
