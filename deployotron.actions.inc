@@ -786,7 +786,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function run(array $state) {
-      if (!$this->drush('variable-set', array('maintainance_mode', 1))) {
+      if (!$this->drush('variable-set', array('maintenance_mode', 1))) {
         return drush_set_error(dt('Error setting site offline.'));
       }
       return TRUE;
@@ -816,7 +816,7 @@ namespace Deployotron\Actions {
      * {@inheritdoc}
      */
     public function run(array $state) {
-      if (!$this->drush('variable-set', array('maintainance_mode', 0))) {
+      if (!$this->drush('variable-set', array('maintenance_mode', 0))) {
         return drush_set_error(dt('Error setting site online.'));
       }
       return TRUE;
