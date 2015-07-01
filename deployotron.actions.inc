@@ -36,6 +36,7 @@ namespace Deployotron {
         'CreateVersionTxt',
         'RestoreDatabase',
         'SiteOnline',
+        'ClearCache',
       ),
     );
 
