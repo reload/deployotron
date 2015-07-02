@@ -30,9 +30,13 @@ namespace Deployotron {
         'NewRelicNotificaton',
       ),
       'omg' => array(
+        'SiteOffline',
         'OMGPrepare',
         'DeployCode',
+        'CreateVersionTxt',
         'RestoreDatabase',
+        'SiteOnline',
+        'ClearCache',
       ),
     );
 
