@@ -322,7 +322,7 @@ namespace Deployotron {
      * @return bool
      *   Success or failure.
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       return FALSE;
     }
 
@@ -574,7 +574,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       $success = $this->sh($this->command);
       drush_print($this->shOutput());
       if (!$success) {
@@ -621,7 +621,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       // Fetch the latest changes from upstream.
       if (!$this->sh('git fetch')) {
         $message = $this->shOutput();
@@ -746,7 +746,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       // Some useful information for other actions.
       $state['requested_branch'] = drush_get_option('branch', NULL);
       $state['requested_tag'] = drush_get_option('tag', NULL);
@@ -789,7 +789,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!$this->drush('variable-set', array('maintenance_mode', 1))) {
         return drush_set_error(dt('Error setting site offline.'));
       }
@@ -802,7 +802,7 @@ namespace Deployotron\Actions {
     public function rollback() {
       // Use the online action as rollback.
       $online = new SiteOnline($this->site);
-      $online->run(new ArrayObject());
+      $online->run(new \ArrayObject());
     }
   }
 
@@ -819,7 +819,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!$this->drush('variable-set', array('maintenance_mode', 0))) {
         return drush_set_error(dt('Error setting site online.'));
       }
@@ -832,7 +832,7 @@ namespace Deployotron\Actions {
     public function rollback() {
       // Use the online action as rollback.
       $online = new SiteOffline($this->site);
-      $online->run(new ArrayObject());
+      $online->run(new \ArrayObject());
     }
   }
 
@@ -868,7 +868,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!$this->drush('sql-dump', array(), array('no-ordered-dump' => TRUE, 'result-file' => $this->dumpFilename()))) {
         return drush_set_error('Error dumping database.');
       }
@@ -925,7 +925,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!$this->drush('sql-connect', array(), array('pipe' => TRUE))) {
         return drush_set_error('Error getting database connection setup.');
       }
@@ -1004,7 +1004,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (count($this->deleteDumps)) {
         $this->sh('rm ' . implode(" ", array_map('drush_escapeshellarg', $this->deleteDumps)));
       }
@@ -1027,7 +1027,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!$this->drush('updb', array(), array('yes' => TRUE))) {
         return drush_set_error(dt('Error running database updates.'));
       }
@@ -1047,7 +1047,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!$this->drush('cc', array('all'), array())) {
         return drush_set_error(dt('Error clearing cache.'));
       }
@@ -1110,7 +1110,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       // Doing nothing.
       return TRUE;
     }
@@ -1129,7 +1129,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!empty($state['deployed_sha'])) {
         // Ask git which tags points to this commit.
         $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
@@ -1183,7 +1183,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!empty($state['deployed_sha'])) {
         $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
@@ -1274,7 +1274,7 @@ namespace Deployotron\Actions {
     /**
      * {@inheritdoc}
      */
-    public function run(ArrayObject $state) {
+    public function run(\ArrayObject $state) {
       if (!empty($state['deployed_sha'])) {
         $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
