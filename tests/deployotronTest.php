@@ -43,12 +43,12 @@ class DeployotronCase extends CommandUnishTestCase {
       // Start afresh.
       `rm -rf $deploy_site`;
     }
-    exec("cd " . dirname($deploy_site) . " && git clone " . $cached_repo . " $deploy_site", $output, $rc);
+    exec("cd " . dirname($deploy_site) . " && 2>&1 >/dev/null git clone " . $cached_repo . " $deploy_site", $output, $rc);
     if ($rc != 0) {
       $this->fail('Problem cloning site for deployment.');
     }
     // Check out a known version.
-    exec("cd " . $deploy_site . " && git checkout 7a9166ac76bb63f45a5a8a6b9a4e3a58eb04da6e");
+    exec("cd " . $deploy_site . " && git 2>&1 >/dev/null checkout 7a9166ac76bb63f45a5a8a6b9a4e3a58eb04da6e");
 
     // Pretend that the current site is a clone of the same. Local git commands
     // need this.
