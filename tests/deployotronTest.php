@@ -152,14 +152,14 @@ class DeployotronCase extends CommandUnishTestCase {
     $this->drush('help', array('omg'), array(), NULL, $this->webroot());
     $this->assertRegExp('/Try to find a backup, and restore it to the site/', $this->getOutput());
 
-    // And check that the topic command outputs something.
-    $this->drush('topic', array('deployotron-actions'), array(), NULL, $this->webroot());
-    // Check some random strings.
-    $this->assertRegExp('/Commands\\n--------/', $this->getOutput());
-    $this->assertRegExp('/Actions\\n-------/', $this->getOutput());
-    $this->assertRegExp('/deploy runs the actions: SanityCheck/', $this->getOutput());
-    $this->assertRegExp('/DeployCode:\\nChecks out a specified/', $this->getOutput());
-    $this->assertRegExp('/--branch/', $this->getOutput());
+    // // And check that the topic command outputs something.
+    // $this->drush('topic', array('deployotron-actions'), array(), NULL, $this->webroot());
+    // // Check some random strings.
+    // $this->assertRegExp('/Commands\\n--------/', $this->getOutput());
+    // $this->assertRegExp('/Actions\\n-------/', $this->getOutput());
+    // $this->assertRegExp('/deploy runs the actions: SanityCheck/', $this->getOutput());
+    // $this->assertRegExp('/DeployCode:\\nChecks out a specified/', $this->getOutput());
+    // $this->assertRegExp('/--branch/', $this->getOutput());
 
     // Use the filter arg to get full coverage of hook_drush_help().
     $this->drush('help', array(), array('filter' => NULL, 'n' => NULL), NULL, $this->webroot(), self::UNISH_EXITCODE_USER_ABORT);
