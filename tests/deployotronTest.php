@@ -162,7 +162,7 @@ class DeployotronCase extends CommandUnishTestCase {
     $this->assertRegExp('/--branch/', $this->getOutput());
 
     // Use the filter arg to get full coverage of hook_drush_help().
-    $this->drush('help', array(), array('filter' => NULL, 'n' => NULL), NULL, $this->webroot());
+    $this->drush('help', array(), array('filter' => NULL, 'n' => NULL), NULL, $this->webroot(), self::UNISH_EXITCODE_USER_ABORT);
     $this->assertRegExp('/Deployotron: Deploys site./', $this->getOutput());
   }
 
@@ -194,8 +194,8 @@ class DeployotronCase extends CommandUnishTestCase {
         'n' => TRUE,
         'branch' => '',
         'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0',
-      ), NULL, $this->webroot());
-    $this->assertRegExp('/Aborting/', $this->getOutput());
+      ), NULL, $this->webroot(), self::UNISH_EXITCODE_USER_ABORT);
+    $this->assertRegExp('/Cancelled/', $this->getOutput());
     $this->assertNotRegExp('/Done/', $this->getOutput());
   }
 
@@ -335,7 +335,7 @@ class DeployotronCase extends CommandUnishTestCase {
       'branch' => '',
       'sha' => '04256b5992d8b4a4fae25c7cb7888583749fabc0',
     );
-    $this->drush('deploy 2>&1', array('@deployotron'), $options, NULL, $this->webroot());
+    $this->drush('deploy 2>&1', array('@deployotron'), $options, NULL, $this->webroot(), self::UNISH_EXITCODE_USER_ABORT);
     $this->assertRegExp('/Those about to deploy, salute you/', $this->getOutput());
     $this->assertNotRegExp("/Are you pondering what I'm pondering/", $this->getOutput());
 
