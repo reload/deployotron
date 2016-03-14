@@ -534,7 +534,7 @@ namespace Deployotron {
         if ($this->sh('git rev-parse HEAD')) {
           $sha = trim($this->shOutput());
           // Confirm that we can see the HEAD locally.
-          if ($this->shLocal('git show ' . $sha)) {
+          if ($this->shLocal('git show -s ' . $sha)) {
             self::$headShas[$name] = $sha;
           }
           else {
