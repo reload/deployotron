@@ -1,5 +1,7 @@
 <?php
 
+namespace Unish;
+
 /**
  * @file
  * PHPUnit Tests for Deployotron.
@@ -10,7 +12,7 @@ define('DEPLOYOTRON_SITE_REPO', 'https://github.com/reload/deployotron_testsite.
 /**
  * Deployotron testing class.
  */
-class DeployotronCase extends Drush_CommandTestCase {
+class DeployotronCase extends CommandUnishTestCase {
 
   /**
    * Token for a testing Flowdock flow.
@@ -24,12 +26,12 @@ class DeployotronCase extends Drush_CommandTestCase {
     if (file_exists($this->webroot())) {
       exec("rm -rf " . $this->webroot() . '/sites/*');
     }
-    $this->setUpDrupal(1, TRUE);
+    $this->setUpDrupal(1, TRUE, 7);
 
     // For speed, cache the repo we clone.
     $cached_repo = $this->cachedRepo();
     if (!file_exists($cached_repo)) {
-      exec("cd " . dirname($cached_repo) . " && git clone --bare " . DEPLOYOTRON_SITE_REPO . " " . basename($cached_repo), $output, $rc);
+      exec("cd " . dirname($cached_repo) . " && git 2>&1 >/dev/null clone --bare " . DEPLOYOTRON_SITE_REPO . " " . basename($cached_repo), $output, $rc);
       if ($rc != 0) {
         $this->fail('Problem cloning site for deployment.');
       }
@@ -367,7 +369,7 @@ class DeployotronCase extends Drush_CommandTestCase {
     $this->drush('vset', array('magic_variable', 'bumblebee'), array(), '@deployotron', $this->webroot());
     // Check that we can see the value.
     $this->drush('vget', array('magic_variable'), array(), '@deployotron', $this->webroot());
-    $this->assertRegExp("/magic_variable: .bumblebee./", $this->getOutput());
+    $this->assertRegExp("/magic_variable: bumblebee/", $this->getOutput());
 
     // Deploy another version.
     $this->drush('deploy 2>&1', array('@deployotron'), array(
