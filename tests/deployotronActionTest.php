@@ -45,7 +45,7 @@ class DeployotronActionCase extends Drush_UnitTestCase {
    * Teardown after each test.
    */
   public function tearDown() {
-    // Reset drush_log for good me assure.
+    // Reset drush_log for good meassure.
     drush_set_context('DRUSH_LOG_CALLBACK', $this->prevLog);
   }
 
