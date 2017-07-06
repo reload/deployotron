@@ -453,6 +453,27 @@ namespace Deployotron {
     }
 
     /**
+     * Find the tag pointed to by a SHA.
+     *
+     * @param string $sha
+     *   The SHA to lookup.
+     *
+     * @return bool
+     *   Whether the command succeeded.
+     */
+    protected function gitPointsAt ($sha) {
+      $success = $this->shLocal('git tag --points-at ' . $sha);
+
+      // If it failed we try a fallback command for older versions of
+      // git.
+      if (!$success) {
+          $success = $this->shLocal('git show-ref --tags -d | grep ^' . $sha . ' | sed -e \'s,.* refs/tags/,,\' -e \'s/\^{}//\'');
+      }
+
+      return $success;
+    }
+
+    /**
      * Execute a drush command.
      *
      * Is run on the site.
@@ -1132,7 +1153,7 @@ namespace Deployotron\Actions {
     public function run(\ArrayObject $state) {
       if (!empty($state['deployed_sha'])) {
         // Ask git which tags points to this commit.
-        $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
+        $this->gitPointsAt($state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
 
         $version_txt = array();
@@ -1185,7 +1206,7 @@ namespace Deployotron\Actions {
      */
     public function run(\ArrayObject $state) {
       if (!empty($state['deployed_sha'])) {
-        $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
+        $this->gitPointsAt($state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
 
         $subject = 'Deployment to ' . $this->site['remote-user'] . '@' .
@@ -1276,7 +1297,7 @@ namespace Deployotron\Actions {
      */
     public function run(\ArrayObject $state) {
       if (!empty($state['deployed_sha'])) {
-        $this->shLocal('git tag --points-at ' . $state['deployed_sha']);
+        $this->gitPointsAt($state['deployed_sha']);
         $tags = implode(', ', $this->shOutputArray());
 
         $body = 'SHA: ' . $state['deployed_sha'] .
