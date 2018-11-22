@@ -244,7 +244,7 @@ class DeployotronCase extends Drush_CommandTestCase {
     // Check that a dirty checkout makes deployment fail..
     file_put_contents($this->deploySite() . '/index.php', 'stuff');
     $this->drush('deploy 2>&1', array('@deployotron'), array('y' => TRUE), NULL, $this->webroot(), self::EXIT_ERROR);
-    $this->assertRegExp('/Repository not clean/', $this->getOutput());
+    $this->assertRegExp('/Remote git checkout not clean/', $this->getOutput());
 
     // Check that a dirty checkout makes deployment fail, even if added to git.
     exec('cd ' . $this->deploySite() . ' && git add -u');

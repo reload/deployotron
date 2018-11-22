@@ -677,7 +677,7 @@ namespace Deployotron\Actions {
       // if they fail.
       if (!$this->sh('git diff-files --quiet --ignore-submodules --')) {
         if ($this->shRc() != 129) {
-          return drush_set_error(dt('Repository not clean.'));
+          return drush_set_error(dt('Remote git checkout not clean.'));
         }
         $fallback = TRUE;
       }
@@ -695,7 +695,7 @@ namespace Deployotron\Actions {
         }
         $output = trim($this->shOutput());
         if (!empty($output)) {
-          return drush_set_error(dt('Repository not clean.'));
+          return drush_set_error(dt('Remote git checkout not clean.'));
         }
       }
 
